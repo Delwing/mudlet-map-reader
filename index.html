@@ -10,17 +10,16 @@
     <script src="js/jquery.js"></script>
     <script src="js/jquery-mousewheel.min.js"></script>
     <script src="js/map.js"></script>
-    <link href="style.css" rel="stylesheet" type="text/css">
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
 </head>
-
 <body>
 <header>
-    <h1>Mapa Arkadii</h1>
-    <label for="area">Obszar: </label><select id="area">
-
-    </select>
-    <button class="zIndexPlus">+</button>
-    <button class="zIndexMinus">-</button>
+    <h2>Mapa Arkadii</h2>
+    <form>
+        <select class="form-control" id="area"></select>
+    </form>
+    <span class="levels"></span>
 </header>
 <div class="map-container">
     <div class="info-box">
@@ -30,7 +29,5 @@
     </div>
     <canvas id="map" resize></canvas>
 </div>
-
 </body>
-
 </html>

@@ -51,11 +51,7 @@ class MapRenderer {
     render() {
         let textOffset = 80;
 
-        this.setDrawingBounds();
-        this.drawBackground(textOffset);
-        this.setViewZoom(textOffset);
-
-        var text = new PointText(new Point(this.drawingBounds.minX + this.baseSize * 2 - textOffset, this.drawingBounds.maxY - this.baseSize * 2 + textOffset));
+        let text = new PointText(new Point(0, 0));
         text.fillColor = envColors.default;
         text.fontSize = 60;
         text.content = this.area.areaName;
@@ -63,43 +59,48 @@ class MapRenderer {
         text.locked = true;
         text.scale(1, -1);
 
+        this.setDrawingBounds(text, textOffset);
+        this.drawBackground(textOffset);
+        this.setViewZoom(textOffset);
+
+        let targetPoint = new Point(this.drawingBounds.minX + this.baseSize * 2 - textOffset, this.drawingBounds.maxY - this.baseSize * 2 + textOffset)
+        text.setPoint(targetPoint)
+
         this.area.rooms.forEach(value => this.renderRoom(new Room(value, this.baseSize)), this);
         if (this.area.labels !== undefined) {
             this.area.labels.forEach(value => this.renderLabel(value), this);
         }
 
         let toHighlight = params.get('highlights');
-            if(toHighlight !== null) {
-                toHighlight.split(",").forEach(value => this.renderHighlight(value));
-            }
+        if (toHighlight !== null) {
+            toHighlight.split(",").forEach(value => this.renderHighlight(value));
+        }
 
         project.layers.forEach(function (layer) {
             layer.transform(new Matrix(1, 0, 0, -1, textOffset, textOffset));
         });
-
-
     }
 
-    setDrawingBounds() {
+    setDrawingBounds(text, textOffset) {
         let bounds = this.area.getAreaBounds();
-        let additionalPadding = this.baseSize * 2;
+        let additionalPadding = this.baseSize * 4;
 
         this.drawingBounds = {
             minX: this.calculateCoordinates(bounds.minX) - this.baseSize - additionalPadding,
-            minY: this.calculateCoordinates(bounds.minY) - this.baseSize - additionalPadding,
-            maxX: this.calculateCoordinates(bounds.maxX) + this.baseSize + additionalPadding,
-            maxY: this.calculateCoordinates(bounds.maxY) + this.baseSize + additionalPadding
+            minY: this.calculateCoordinates(bounds.minY) - this.baseSize - additionalPadding - textOffset,
+            maxX: Math.max(this.calculateCoordinates(bounds.maxX) + this.baseSize + additionalPadding, text.bounds.width),
+            maxY: Math.max(this.calculateCoordinates(bounds.maxY) + this.baseSize + additionalPadding, text.bounds.height)
         };
 
-        this.drawingBounds.width = Math.abs(this.drawingBounds.maxX - this.drawingBounds.minX);
-        this.drawingBounds.height = Math.abs(this.drawingBounds.maxY - this.drawingBounds.minY);
+        this.drawingBounds.width = Math.max(Math.abs(this.drawingBounds.maxX - this.drawingBounds.minX), text.bounds.width);
+        this.drawingBounds.height = Math.max(Math.abs(this.drawingBounds.maxY - this.drawingBounds.minY), text.bounds.height);
         this.drawingBounds.xMid = (this.drawingBounds.minX + this.drawingBounds.maxX) / 2;
         this.drawingBounds.yMid = (this.drawingBounds.minY + this.drawingBounds.maxY) / 2;
     }
 
     drawBackground(offset) {
         this.backgroundLayer.activate();
-        let background = new Path.Rectangle(this.drawingBounds.minX - offset, this.drawingBounds.minY, this.drawingBounds.width + offset, this.drawingBounds.height + offset );
+        let background = new Path.Rectangle(this.drawingBounds.minX - offset, this.drawingBounds.minY + offset, this.drawingBounds.width + offset, this.drawingBounds.height + offset);
         background.fillColor = 'black';
         let that = this;
         background.onClick = function () {
@@ -110,9 +111,8 @@ class MapRenderer {
     }
 
     setViewZoom(offset) {
-        view.center = new Point(this.drawingBounds.xMid + offset / 2, -this.drawingBounds.yMid + offset / 2);
+        view.center = new Point(this.drawingBounds.xMid + offset / 2, -this.drawingBounds.yMid);
         view.scale(Math.min((view.size.height - offset * 2) / this.drawingBounds.height, (view.size.width - offset * 2) / this.drawingBounds.width));
-        //view.scale(1);
     }
 
     getBounds() {
@@ -170,7 +170,7 @@ class MapRenderer {
         this.roomSelected = room;
         let exits = {...room.exits, ...room.specialExits};
 
-       room.exitRenders.forEach(path => {
+        room.exitRenders.forEach(path => {
             if (path !== undefined) {
                 path.bringToFront();
                 path.strokeColor = selectionColor;
@@ -191,7 +191,7 @@ class MapRenderer {
             this.roomSelected.render.strokeColor = '';
             this.roomSelected.render.strokeWidth = 0;
             this.roomSelected.exitRenders.forEach(path => {
-                if(path !== undefined) {
+                if (path !== undefined) {
                     path.strokeColor = envColors.default;
                     path.bringToFront();
                     path.strokeWidth = 1;
@@ -582,14 +582,18 @@ class MapReader {
 
     getArea(areaId, zIndex) {
         let area = this.data[mapDataIndex[areaId]];
-        return new Area(area.areaName, area.rooms.filter(value => value.z === zIndex), area.labels.filter(value => value.Z === zIndex));
+        let levels = new Set();
+        return new Area(area.areaName, area.rooms.filter(value => {
+            levels.add(parseInt(value.z));
+            return value.z === zIndex
+        }), area.labels.filter(value => value.Z === zIndex), levels);
     }
 
 
 }
 
 class Area {
-    constructor(areaName, rooms, labels) {
+    constructor(areaName, rooms, labels, levels) {
         this.areaName = areaName;
         this.rooms = [];
         this.labels = labels;
@@ -597,6 +601,7 @@ class Area {
         rooms.forEach(function (element) {
             that.rooms[element.id] = element;
         });
+        this.levels = levels;
     }
 
     getAreaBounds() {
@@ -617,6 +622,10 @@ class Area {
         return this.rooms[id];
     }
 
+    getLevels() {
+        return this.levels;
+    }
+
 }
 
 class Controls {
@@ -628,17 +637,14 @@ class Controls {
         this.areaId = 1;
         this.zIndex = 0;
 
+        this.levels = jQuery(".levels");
+
         this.activateMouseEvents();
         this.populateSelectBox(jQuery("#area"));
 
         let that = this;
-        jQuery(".zIndexPlus").click(function () {
-            that.zIndex += 1;
-            that.draw();
-        });
-
-        jQuery(".zIndexMinus").click(function () {
-            that.zIndex -= 1;
+        this.levels.on("click", ".btn-level", function () {
+            that.zIndex = parseInt(jQuery(this).attr("data-level"));
             that.draw();
         });
     }
@@ -704,9 +710,24 @@ class Controls {
     }
 
 
+    populateLevelButtons(levelsSet, zIndex) {
+        this.levels.html("");
+        let levelsSorted = Array.from(levelsSet).sort(function(a,b) { return a - b; });
+        for (let level of levelsSorted) {
+            let classes = "btn btn-level";
+            if (level === zIndex) {
+                classes += " btn-primary";
+            } else {
+                classes += " btn-secondary";
+            }
+            this.levels.append("<button type=\"button\" class=\"" + classes + "\" data-level=\"" + level + "\">" + level + "</button>");
+        }
+    }
+
     draw() {
         project.clear();
         let area = this.reader.getArea(this.areaId, this.zIndex);
+        this.populateLevelButtons(area.getLevels(), this.zIndex);
         this.renderer = new MapRenderer(this.canvas, area, 1);
         this.renderer.render();
         view.draw();
@@ -723,7 +744,7 @@ jQuery(function () {
     controls.draw();
 
     let area = params.get('area');
-    if(area == null) {
+    if (area == null) {
         area = position.area
     }
     let select = jQuery("select").val(area);
