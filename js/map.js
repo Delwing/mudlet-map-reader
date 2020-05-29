@@ -66,8 +66,8 @@ class MapRenderer {
         this.drawBackground(textOffset);
         this.setViewZoom(textOffset);
 
-        let targetPoint = new Point(this.drawingBounds.minX + this.baseSize * 2 - textOffset, this.drawingBounds.maxY - this.baseSize * 2 + textOffset)
-        text.setPoint(targetPoint)
+        let targetPoint = new Point(this.drawingBounds.minX + this.baseSize * 2 - textOffset, this.drawingBounds.maxY - this.baseSize * 2 + textOffset);
+        text.setPoint(targetPoint);
 
         this.area.rooms.forEach(value => this.renderRoom(new Room(value, this.baseSize)), this);
         if (this.area.labels !== undefined) {
@@ -133,7 +133,7 @@ class MapRenderer {
         rectangle.fillColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255);
 
         room.render = rectangle;
-        this.pointerReactor(rectangle)
+        this.pointerReactor(rectangle);
 
         room.exitRenders = [];
         for (let dir in room.exits) {
@@ -327,7 +327,7 @@ class MapRenderer {
         let lineEnd = secondPoint;
 
         let tailLine = new Path.Line(lineStart, lineEnd);
-        let tailVector = new Point(lineEnd.x - lineStart.x, lineEnd.y - lineStart.y)
+        let tailVector = new Point(lineEnd.x - lineStart.x, lineEnd.y - lineStart.y);
         let headLine = tailVector.normalize(headLength);
 
         let path = new Group([
@@ -443,7 +443,7 @@ class MapRenderer {
         let x = (firstPoint.x + secondPoint.x) / 2;
         let y = (firstPoint.y + secondPoint.y) / 2;
         let door = new Path.Rectangle(x - this.baseSize / 4, y - this.baseSize / 4, this.baseSize / 2, this.baseSize / 2);
-        door.scale(0.85, door.center)
+        door.scale(0.85, door.center);
         door.strokeColor = 'rgb(47,168,255)';
         door.strokeWidth = 2;
     }
@@ -667,7 +667,7 @@ class Controls {
         let that = this;
         toolPan.onMouseDrag = function (event) {
             that.canvas.style.cursor = "all-scroll";
-            let bounds = that.renderer.getBounds();
+            let bounds = that.renderer.getBounds(); //TODO prevent drag over bounds
             let delta = event.downPoint.subtract(event.point);
             view.scrollBy(delta);
             that.renderer.isDrag = true;
