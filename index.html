@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Arkadia Map</title>
+    <script src="data/current.js"></script>
+    <script src="data/mapExport.js"></script>
+    <script src="data/colors.js"></script>
+    <script src="js/paper-full.min.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery-mousewheel.min.js"></script>
+    <script src="js/map.js"></script>
+    <link href="style.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<header>
+    <h1>Mapa Arkadii</h1>
+    <label for="area">Obszar: </label><select id="area">
+
+    </select>
+    <button class="zIndexPlus">+</button>
+    <button class="zIndexMinus">-</button>
+</header>
+<div class="map-container">
+    <div class="info-box">
+        <p>RoomID: <span class="room-id"></span></p>
+        <p>RoomName: <span class="room-name"></span></p>
+        <p>Coords: x: <span class="coord-x"></span> y: <span class="coord-y"></span> z: <span class="coord-z"></span></p>
+    </div>
+    <canvas id="map" resize></canvas>
+</div>
+
+</body>
+
+</html>

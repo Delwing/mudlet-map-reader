@@ -1,0 +1,6 @@
+.idea
+*.iml
+*.DS_Store
+data/current.js
+data/mapExport.js
+data/colors.js

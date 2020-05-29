@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.001">
+	<AliasPackage>
+		<Alias isActive="yes" isFolder="no">
+			<name>exportArea</name>
+			<script>MapExporter:export()</script>
+			<command></command>
+			<packageName></packageName>
+			<regex>^/export$</regex>
+		</Alias>
+	</AliasPackage>
+</MudletPackage>
