@@ -52,7 +52,6 @@ function MapExporter:export()
     end
 
     local fileName = self.dir .. "data/mapExport.js"
-    echo("Writing to " ..fileName)
     file = io.open (fileName, "w+")
     file:write("mapData = ")
     file:write(yajl.to_string(areas))
@@ -84,7 +83,7 @@ function MapExporter:export()
     currentPosition:write(yajl.to_string(position))
     currentPosition:close()
 
-    openUrl(self.dir .. "index.html")
+    openUrl("file:///" .. self.dir .. "index.html")
 end
 
 function MapExporter:fixCustomLines(lineObj)
