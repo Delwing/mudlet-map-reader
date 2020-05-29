@@ -55,6 +55,9 @@ class MapRenderer {
         text.fillColor = envColors.default;
         text.fontSize = 60;
         text.content = this.area.areaName;
+        if(this.area.getZIndex() !== 0) {
+            text.content += " (" + this.area.getZIndex() + ")"
+        }
         text.justification = 'left';
         text.locked = true;
         text.scale(1, -1);
@@ -586,14 +589,14 @@ class MapReader {
         return new Area(area.areaName, area.rooms.filter(value => {
             levels.add(parseInt(value.z));
             return value.z === zIndex
-        }), area.labels.filter(value => value.Z === zIndex), levels);
+        }), area.labels.filter(value => value.Z === zIndex), zIndex, levels);
     }
 
 
 }
 
 class Area {
-    constructor(areaName, rooms, labels, levels) {
+    constructor(areaName, rooms, labels, zIndex, levels) {
         this.areaName = areaName;
         this.rooms = [];
         this.labels = labels;
@@ -602,6 +605,7 @@ class Area {
             that.rooms[element.id] = element;
         });
         this.levels = levels;
+        this.zIndex = zIndex;
     }
 
     getAreaBounds() {
@@ -626,6 +630,9 @@ class Area {
         return this.levels;
     }
 
+    getZIndex() {
+        return this.zIndex;
+    }
 }
 
 class Controls {
@@ -705,6 +712,7 @@ class Controls {
         let that = this;
         select.on("change", function (event) {
             that.areaId = jQuery(this).val();
+            that.zIndex = 0;
             that.draw();
         })
     }
