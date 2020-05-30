@@ -1,6 +1,7 @@
 # Map Reader do Mudleta
 
 Plugin do [Arkadia skryptów](https://github.com/tjurczyk/arkadia)
+Minimalna wymagana wersja skryptów to 4.7
 
 Eksportuje mapę do odczytu w przeglądarace.
 Work in progress...
