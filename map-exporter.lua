@@ -1,6 +1,6 @@
 MapExporter = MapExporter or {
     areas = {},
-    dir = getMudletHomeDir() .. "/plugins/map-reader/"
+    dir = getMudletHomeDir() .. "/plugins/mudlet-map-reader/"
 }
 
 function MapExporter:export()

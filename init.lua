@@ -1,3 +1,3 @@
 return {
-	"export-map"
+	"map-exporter"
 }
