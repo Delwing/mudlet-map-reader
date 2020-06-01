@@ -9,7 +9,7 @@
 			<script>MapExporter:export()</script>
 			<command></command>
 			<packageName></packageName>
-			<regex>^/export$</regex>
+			<regex>^/export_map$</regex>
 		</Alias>
 	</AliasPackage>
 	<ActionPackage />

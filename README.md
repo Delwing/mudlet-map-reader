@@ -17,6 +17,6 @@ Work in progress...
 
 Wystarczy wywołać komendę
 ```
-/export
+/export_map
 ```
 Komenda wyeksportują naszą mapę i otworzy przeglądarkę.
