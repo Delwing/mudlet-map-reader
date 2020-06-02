@@ -472,6 +472,11 @@ class MapRenderer {
         infBox.find(".coord-x").html(room.x);
         infBox.find(".coord-y").html(room.y);
         infBox.find(".coord-z").html(room.z);
+        let special = infBox.find(".special");
+        special.html("<ul></ul>");
+        for(let exit in room.specialExits) {
+            special.append("<li>" + exit + " : " + room.specialExits[exit] + "</li>")
+        }
     }
 
     hideRoomInfo() {
