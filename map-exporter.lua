@@ -73,15 +73,17 @@ function MapExporter:export()
     colorsFile:write(yajl.to_string(colors))
     colorsFile:close()
 
-    local position = {
-        area = getRoomArea(getPlayerRoom()),
-        room = getPlayerRoom()
-    }
-    local currentPosition = self.dir .. "/data/current.js"
-    currentPosition = io.open (currentPosition, "w+")
-    currentPosition:write("position = ")
-    currentPosition:write(yajl.to_string(position))
-    currentPosition:close()
+    if getPlayerRoom() then
+        local position = {
+            area = getRoomArea(getPlayerRoom()),
+            room = getPlayerRoom()
+        }
+        local currentPosition = self.dir .. "/data/current.js"
+        currentPosition = io.open (currentPosition, "w+")
+        currentPosition:write("position = ")
+        currentPosition:write(yajl.to_string(position))
+        currentPosition:close()
+    end
 
     openUrl("file:///" .. self.dir .. "index.html")
 end
