@@ -32,12 +32,9 @@ mapData.forEach(function (value, index) {
 rooms = [];
 
 class MapRenderer {
-
-    baseSize = 20;
-    ladders = ["up", "down"];
-    roomSelected;
-
     constructor(canvas, area, scale) {
+        this.baseSize = 20;
+        this.ladders = ["up", "down"];
         this.canvas = canvas;
         this.area = area;
         this.scale = scale;
@@ -46,6 +43,7 @@ class MapRenderer {
         this.roomLayer = new Layer();
         this.labelsLayr = new Layer();
         this.specialLinkLayer = new Layer();
+        this.roomSelected = null;
     }
 
     render() {
