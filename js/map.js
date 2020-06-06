@@ -43,7 +43,7 @@ class MapRenderer {
         this.roomLayer = new Layer();
         this.labelsLayr = new Layer();
         this.specialLinkLayer = new Layer();
-        this.roomSelected = null;
+        this.roomSelected = undefined;
     }
 
     render() {
