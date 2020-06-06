@@ -89,8 +89,8 @@ class MapRenderer {
         this.drawingBounds = {
             minX: this.calculateCoordinates(bounds.minX) - this.baseSize - additionalPadding,
             minY: this.calculateCoordinates(bounds.minY) - this.baseSize - additionalPadding - textOffset,
-            maxX: Math.max(this.calculateCoordinates(bounds.maxX) + this.baseSize + additionalPadding, text.bounds.width),
-            maxY: Math.max(this.calculateCoordinates(bounds.maxY) + this.baseSize + additionalPadding, text.bounds.height)
+            maxX: Math.max(this.calculateCoordinates(bounds.maxX) + this.baseSize + additionalPadding),
+            maxY: Math.max(this.calculateCoordinates(bounds.maxY) + this.baseSize + additionalPadding)
         };
 
         this.drawingBounds.width = Math.max(Math.abs(this.drawingBounds.maxX - this.drawingBounds.minX), text.bounds.width);
@@ -622,7 +622,7 @@ class Area {
             maxX = Math.max(maxX, element.x);
             maxY = Math.max(maxY, element.y);
         });
-        return {minX: minX, minY: minY, maxX: maxX, maxY}
+        return {minX: minX, minY: minY, maxX: maxX, maxY: maxY}
     }
 
     getRoomById(id) {
