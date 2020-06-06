@@ -685,12 +685,12 @@ class Controls {
     }
 
     activateZoom() {
-        jQuery(this.canvas).bind('mousewheel', function (e) {
+        jQuery(this.canvas).on('wheel mousewheel', function (e) {
             let oldZoom = view.zoom;
-            if (e.originalEvent.wheelDelta / 240 > 0) {
-                view.zoom *= 1.1;
-            } else {
+            if (e.originalEvent.deltaY / 240 > 0) {
                 view.zoom *= 0.9;
+            } else {
+                view.zoom *= 1.1;
             }
 
             if (Math.abs(view.zoom - 1) < 0.05) {
