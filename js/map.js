@@ -33,7 +33,7 @@ rooms = [];
 
 class MapRenderer {
     constructor(canvas, area, scale) {
-        this.baseSize = 20;
+        this.baseSize = 18;
         this.ladders = ["up", "down"];
         this.canvas = canvas;
         this.area = area;
@@ -53,7 +53,7 @@ class MapRenderer {
         text.fillColor = envColors.default;
         text.fontSize = 60;
         text.content = this.area.areaName;
-        if(this.area.getZIndex() !== 0) {
+        if (this.area.getZIndex() !== 0) {
             text.content += " (" + this.area.getZIndex() + ")"
         }
         text.justification = 'left';
@@ -129,6 +129,8 @@ class MapRenderer {
             color = [114, 1, 0];
         }
         rectangle.fillColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255);
+        rectangle.strokeColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255);
+        rectangle.strokeWidth = 1;
 
         room.render = rectangle;
         this.pointerReactor(rectangle);
@@ -167,7 +169,7 @@ class MapRenderer {
         this.clearSelection();
         let selectionColor = new Color(180 / 255, 93 / 255, 60 / 255);
         rectangle.strokeColor = selectionColor;
-        rectangle.strokeWidth = 2;
+        rectangle.strokeWidth = 1;
         this.roomSelected = room;
         let exits = {...room.exits, ...room.specialExits};
 
@@ -225,11 +227,16 @@ class MapRenderer {
             let secondPoint;
 
             if (room2.exists()) {
-                path = new Path();
-                path.moveTo(exitPoint);
                 let connectedDir = getKeyByValue(room2.exits, room1.id);
+                let isOneWay = connectedDir === undefined
                 secondPoint = new Point(room2.getExitX(connectedDir), room2.getExitY(connectedDir));
-                path.lineTo(secondPoint);
+                if (!isOneWay) {
+                    path = new Path();
+                    path.moveTo(exitPoint);
+                    path.lineTo(secondPoint);
+                } else {
+                    path = this.drawArrow(exitPoint, secondPoint, envColors.default, this.baseSize / 2, true);
+                }
                 path.strokeColor = envColors.default;
             } else {
                 secondPoint = new Point(room1.getXMid(), room1.getYMid());
@@ -317,7 +324,7 @@ class MapRenderer {
         }
     }
 
-    drawArrow(exitPoint, secondPoint, color, sizeFactor) {
+    drawArrow(exitPoint, secondPoint, color, sizeFactor, isOneWay) {
         let headLength = sizeFactor;
         let headAngle = 150;
 
@@ -328,17 +335,27 @@ class MapRenderer {
         let tailVector = new Point(lineEnd.x - lineStart.x, lineEnd.y - lineStart.y);
         let headLine = tailVector.normalize(headLength);
 
+        let arrow = new Path([
+            new Point(lineEnd.x + headLine.rotate(headAngle).x, lineEnd.y + headLine.rotate(headAngle).y),
+            lineEnd,
+            new Point(lineEnd.x + headLine.rotate(-headAngle).x, lineEnd.y + headLine.rotate(-headAngle).y),
+            new Point(lineEnd.x + headLine.rotate(headAngle).x, lineEnd.y + headLine.rotate(headAngle).y),
+        ]);
+
         let path = new Group([
             tailLine,
-            new Path([
-                new Point(lineEnd.x + headLine.rotate(headAngle).x, lineEnd.y + headLine.rotate(headAngle).y),
-                lineEnd,
-                new Point(lineEnd.x + headLine.rotate(-headAngle).x, lineEnd.y + headLine.rotate(-headAngle).y),
-                new Point(lineEnd.x + headLine.rotate(headAngle).x, lineEnd.y + headLine.rotate(headAngle).y),
-            ]),
+            arrow
         ]);
         path.closed = true;
         path.fillColor = color;
+
+        if (isOneWay) {
+            arrow.position = new Point(lineStart.x + ((lineEnd.x - lineStart.x) / 2.5), lineStart.y + ((lineEnd.y - lineStart.y) / 2.5));
+            tailLine.dashArray = [2, 2];
+            arrow.fillColor = 'red'
+        }
+
+
         return path;
     }
 
@@ -472,7 +489,7 @@ class MapRenderer {
         infBox.find(".coord-z").html(room.z);
         let special = infBox.find(".special");
         special.html("<ul></ul>");
-        for(let exit in room.specialExits) {
+        for (let exit in room.specialExits) {
             special.append("<li>" + exit + " : " + room.specialExits[exit] + "</li>")
         }
     }
@@ -723,7 +740,9 @@ class Controls {
 
     populateLevelButtons(levelsSet, zIndex) {
         this.levels.html("");
-        let levelsSorted = Array.from(levelsSet).sort(function(a,b) { return a - b; });
+        let levelsSorted = Array.from(levelsSet).sort(function (a, b) {
+            return a - b;
+        });
         for (let level of levelsSorted) {
             let classes = "btn btn-level";
             if (level === zIndex) {
