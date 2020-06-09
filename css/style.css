@@ -5,7 +5,8 @@
 html, body {
     height: 100%;
     width: 100%;
-    margin: 0;}
+    margin: 0;
+}
 
 body {
     padding: 10px;
@@ -15,8 +16,18 @@ body {
 h2 {
     display: inline-block;
     margin: 0 20px;
-    padding: 0;
+    padding: 0 40px;
+    position: relative;
+    font-size: 25px;
 }
+
+h2 img {
+    position: absolute;
+    width: 180px;
+    left: -110px;
+    top: -55px;
+}
+
 
 header {
     border-bottom: 1px solid #cbcbcb;

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Arkadia Map</title>
+    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico"/>
     <script src="data/current.js"></script>
     <script src="data/mapExport.js"></script>
     <script src="data/colors.js"></script>
@@ -16,7 +17,10 @@
 </head>
 <body>
 <header>
-    <h2>Mapa Arkadii</h2>
+    <h2>
+        <img src="images/logo.svg" class="logo" alt="logo">
+        Mapa Arkadii
+    </h2>
     <form>
         <select class="form-control" id="area"></select>
     </form>
@@ -33,10 +37,10 @@
 </div>
 <div class="zoom-controls btn-group-vertical">
     <span class="btn btn-dark btn-sm" data-factor="1.1">
-        <img src="images/plus.svg">
+        <img src="images/plus.svg" alt="plus">
     </span>
     <span class="btn btn-dark btn-sm" data-factor="0.9">
-        <img src="images/dash.svg">
+        <img src="images/dash.svg" alt="minus">
     </span>
 </div>
 <div class="map-container">
@@ -47,7 +51,7 @@
         <p>Special:</p>
         <div class="special"></div>
     </div>
-    <canvas id="map" resize></canvas>
+    <canvas id="map"></canvas>
 </div>
 </body>
 </html>
