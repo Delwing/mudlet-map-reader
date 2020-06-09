@@ -45,6 +45,7 @@ class MapRenderer {
         this.specialLinkLayer = new Layer();
         this.charsLayer = new Layer();
         this.roomSelected = undefined;
+        this.isDrag = false;
     }
 
     render() {
@@ -177,7 +178,9 @@ class MapRenderer {
 
         let that = this;
         rectangle.onClick = function () {
-            that.onRoomClick(room, rectangle);
+            if(!that.isDrag) {
+                that.onRoomClick(room, rectangle);
+            }
         };
     }
 
