@@ -383,6 +383,8 @@ class MapRenderer {
             arrow.position = new Point(lineStart.x + ((lineEnd.x - lineStart.x) / 2.8), lineStart.y + ((lineEnd.y - lineStart.y) / 2.8));
             tailLine.dashArray = [1, 1];
             arrow.fillColor = 'red'
+        } else {
+            tailLine.strokeWidth = 2;
         }
 
 
