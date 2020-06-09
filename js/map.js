@@ -326,7 +326,7 @@ class MapRenderer {
 
     drawArrow(exitPoint, secondPoint, color, sizeFactor, isOneWay) {
         let headLength = sizeFactor;
-        let headAngle = 150;
+        let headAngle = isOneWay ? 160 : 150;
 
         let lineStart = exitPoint;
         let lineEnd = secondPoint;
@@ -350,7 +350,7 @@ class MapRenderer {
         path.fillColor = color;
 
         if (isOneWay) {
-            arrow.position = new Point(lineStart.x + ((lineEnd.x - lineStart.x) / 2.5), lineStart.y + ((lineEnd.y - lineStart.y) / 2.5));
+            arrow.position = new Point(lineStart.x + ((lineEnd.x - lineStart.x) / 2.8), lineStart.y + ((lineEnd.y - lineStart.y) / 2.8));
             tailLine.dashArray = [2, 2];
             arrow.fillColor = 'red'
         }
