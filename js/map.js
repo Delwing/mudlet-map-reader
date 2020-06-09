@@ -695,6 +695,7 @@ class Controls {
         this.levels = jQuery(".levels");
         this.saveImageButton = jQuery(".save-image");
         this.copyImageButton = jQuery(".copy-image");
+        this.zoomButton = jQuery(".zoom-controls .btn");
 
         this.activateMouseEvents();
         this.populateSelectBox(jQuery("#area"));
@@ -713,6 +714,10 @@ class Controls {
         this.copyImageButton.on("click", function () {
             that.copyImage();
         });
+
+        this.zoomButton.on("click", function () {
+            that.zoom(parseFloat(jQuery(this).attr("data-factor")), view.center);
+        })
     }
 
     activateMouseEvents() {
@@ -743,31 +748,30 @@ class Controls {
     activateZoom() {
         var that = this;
         jQuery(this.canvas).on('wheel mousewheel', function (e) {
+            let oldZoom = view.zoom;
             if (e.originalEvent.deltaY / 240 > 0) {
                 that.zoom(0.9, new Point(e.originalEvent.x, e.originalEvent.y))
             } else {
                 that.zoom(1.1, new Point(e.originalEvent.x, e.originalEvent.y))
             }
+
+            let viewPos = view.viewToProject(point);
+            let zoomScale = oldZoom / view.zoom;
+            let centerAdjust = viewPos.subtract(view.center);
+            let offset = viewPos.subtract(centerAdjust.multiply(zoomScale))
+                .subtract(view.center);
+
+            view.center = view.center.add(offset);
         });
     }
 
-    zoom(factor, point) {
-        let oldZoom = view.zoom;
+    zoom(factor) {
         view.zoom *= factor;
-
         if (Math.abs(view.zoom - 1) < 0.05) {
             view.zoom = 1;
         }
 
         view.zoom = Math.min(Math.max(view.zoom, view.minZoom), 10);
-
-        let viewPos = view.viewToProject(point);
-        let zoomScale = oldZoom / view.zoom;
-        let centerAdjust = viewPos.subtract(view.center);
-        let offset = viewPos.subtract(centerAdjust.multiply(zoomScale))
-            .subtract(view.center);
-
-        view.center = view.center.add(offset);
     }
 
 

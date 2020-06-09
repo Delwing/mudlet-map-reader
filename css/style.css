@@ -89,4 +89,6 @@ canvas {
     bottom: 5%;
     right: 5%;
     color: white;
+    z-index: 99;
 }
+
