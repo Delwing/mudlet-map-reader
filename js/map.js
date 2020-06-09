@@ -41,8 +41,9 @@ class MapRenderer {
         this.backgroundLayer = new Layer();
         this.linkLayer = new Layer();
         this.roomLayer = new Layer();
-        this.labelsLayr = new Layer();
+        this.labelsLayer = new Layer();
         this.specialLinkLayer = new Layer();
+        this.charsLayer = new Layer();
         this.roomSelected = undefined;
     }
 
@@ -114,6 +115,7 @@ class MapRenderer {
     setViewZoom(offset) {
         view.center = new Point(this.drawingBounds.xMid + offset / 2, -this.drawingBounds.yMid);
         view.scale(Math.min((view.size.height - offset * 2) / this.drawingBounds.height, (view.size.width - offset * 2) / this.drawingBounds.width));
+        view.minZoom = view.zoom
     }
 
     getBounds() {
@@ -223,7 +225,7 @@ class MapRenderer {
     renderHighlight(roomId) {
         let room = new Room(this.area.getRoomById(roomId), this.baseSize);
         if (room.exists()) {
-            this.labelsLayr.activate();
+            this.labelsLayer.activate();
             let circle = new Path.Circle(new Point(room.getXMid(), room.getYMid()), this.baseSize * 0.40);
             circle.fillColor = 'red';
             circle.strokeColor = '#e8fdff';
@@ -317,23 +319,6 @@ class MapRenderer {
                 path.lineTo(secondPoint);
 
                 path.strokeWidth = 1;
-
-                this.specialLinkLayer.activate();
-                let middlePoint = exitPoint.add(secondPoint).divide(2);
-
-
-                // var triangle = new Path.RegularPolygon(middlePoint, 3, this.baseSize / 4);
-                // triangle.fillColor = 'red';
-                // triangle.strokeColor = '#e8fdff';
-                // triangle.bringToFront();
-                // triangle.scale(0.9, 1.4);
-
-                //TODO jaka jest logika tych trojkatow???
-                let triangle = new Path.Circle(middlePoint, this.baseSize / 4);
-                triangle.fillColor = 'red';
-                triangle.strokeColor = '#e8fdff';
-                triangle.bringToFront();
-
             } else {
                 secondPoint = new Point(room1.getXMid(), room1.getYMid());
                 path = this.drawArrow(exitPoint, secondPoint, envColors.default, this.baseSize / 4);
@@ -462,22 +447,27 @@ class MapRenderer {
     }
 
     renderLadder(room, direction) {
-        this.labelsLayr.activate();
+        this.labelsLayer.activate();
         let myPath = new Path();
 
-        let sizeOffset = this.baseSize * 0.90;
-        let oppositeOffset = this.baseSize * 0.10;
-        let height = 0.40;
+
+        let sizeOffset = this.baseSize * 0.85;
+        let oppositeOffset = this.baseSize - sizeOffset
+        let height = 0.35;
 
         myPath.add(new Point(room.getXMid(), room.getY() + sizeOffset - sizeOffset * height));
         myPath.add(new Point(oppositeOffset + room.getX(), room.getY() + sizeOffset));
         myPath.add(new Point(room.getX() + sizeOffset, room.getY() + sizeOffset));
 
+        let baseColor
         if (room.render.fillColor.lightness > 0.4) {
-            myPath.fillColor = new Color(0.20, 0.20, 0.20, 0.75);
+            baseColor = 0.20;
         } else {
-            myPath.fillColor = new Color(0.80, 0.80, 0.85, 0.75);
+            baseColor = 0.80;
         }
+
+        myPath.fillColor = new Color(baseColor, baseColor, baseColor, 0.75)
+        myPath.strokeColor = new Color(baseColor, baseColor, baseColor)
 
         myPath.locked = true;
 
@@ -501,7 +491,7 @@ class MapRenderer {
     }
 
     renderChar(room) {
-        this.roomLayer.activate();
+        this.charsLayer.activate();
         let text = new PointText(new Point(room.getXMid(), room.getYMid() + 5));
         text.fillColor = 'black';
         text.fontSize = 15;
@@ -546,9 +536,6 @@ class MapRenderer {
         text.scale(1, -1)
     }
 
-    calculateLuminance(color) {
-        console.log(color)
-    }
 }
 
 class Room {
@@ -765,6 +752,8 @@ class Controls {
             if (Math.abs(view.zoom - 1) < 0.05) {
                 view.zoom = 1;
             }
+
+            view.zoom = Math.max(view.zoom, view.minZoom);
 
             let viewPos = view.viewToProject(new Point(e.originalEvent.x, e.originalEvent.y));
             let zoomScale = oldZoom / view.zoom;
