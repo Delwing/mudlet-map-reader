@@ -40,7 +40,8 @@ function MapExporter:export()
                 roomChar = getRoomChar(v),
                 doors = getDoors(v),
                 customLines = self:fixCustomLines(getCustomLines(v)),
-                specialExits = getSpecialExitsSwap(v)
+                specialExits = getSpecialExitsSwap(v),
+                stubs = getExitStubs1(v)
             }
             table.insert(areaRooms.rooms, roomInfo)
         end

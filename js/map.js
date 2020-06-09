@@ -151,6 +151,14 @@ class MapRenderer {
                 room.exitRenders.push(this.renderSpecialLink(room, dir, new Room(this.area.getRoomById(room.specialExits[dir]), this.baseSize)))
             }
         }
+
+        room.stubRenders = [];
+        for(let dir in room.stubs) {
+            if(room.stubs.hasOwnProperty(dir)) {
+                room.stubRenders.push(this.renderStub(room, dirNumbers[room.stubs[dir]], this.baseSize))
+            }
+        }
+
         for (let dir in room.customLines) {
             room.exitRenders.push(this.renderCustomLine(room, dir))
         }
@@ -176,8 +184,9 @@ class MapRenderer {
         room.exitRenders.forEach(path => {
             if (path !== undefined) {
                 path.bringToFront();
+                path.orgStrokeColor = path.strokeColor;
                 path.strokeColor = selectionColor;
-                path.strokeWidth = 2;
+                path.strokeWidth = 1;
             }
         });
 
@@ -195,7 +204,7 @@ class MapRenderer {
             this.roomSelected.render.strokeWidth = 0;
             this.roomSelected.exitRenders.forEach(path => {
                 if (path !== undefined) {
-                    path.strokeColor = envColors.default;
+                    path.strokeColor = path.orgStrokeColor;
                     path.bringToFront();
                     path.strokeWidth = 1;
                 }
@@ -220,7 +229,6 @@ class MapRenderer {
     renderLink(room1, dir1, room2, exit) {
         this.linkLayer.activate();
         if (room1 !== undefined && !room1.specialExits.hasOwnProperty(dir1)) {
-
             let path;
 
             let exitPoint = new Point(room1.getExitX(dir1), room1.getExitY(dir1));
@@ -228,7 +236,7 @@ class MapRenderer {
 
             if (room2.exists()) {
                 let connectedDir = getKeyByValue(room2.exits, room1.id);
-                let isOneWay = connectedDir === undefined
+                let isOneWay = connectedDir === undefined;
                 secondPoint = new Point(room2.getExitX(connectedDir), room2.getExitY(connectedDir));
                 if (!isOneWay) {
                     path = new Path();
@@ -241,7 +249,7 @@ class MapRenderer {
             } else {
                 secondPoint = new Point(room1.getXMid(), room1.getYMid());
                 path = this.drawArrow(exitPoint, secondPoint, room1.render.fillColor, this.baseSize / 4);
-                path.strokeColor = envColors.default
+                path.strokeColor = envColors.default;
                 path.scale(3, exitPoint);
                 path.rotate(180, exitPoint);
                 let that = this;
@@ -258,6 +266,19 @@ class MapRenderer {
             return path;
         }
 
+    }
+
+    renderStub(room, dir) {
+        this.linkLayer.activate();
+        let startPoint = new Point(room.getXMid(dir), room.getYMid(dir));
+        let exitPoint = new Point(room.getExitX(dir), room.getExitY(dir));
+        let path = new Path();
+        path.moveTo(startPoint);
+        path.lineTo(exitPoint);
+        path.pivot = startPoint;
+        path.position = exitPoint;
+        path.strokeColor = envColors.default;
+        return path
     }
 
     onExitClick(room) {
@@ -802,6 +823,19 @@ let dirs = {
     "southwest": "sw",
     "up": "u",
     "down": "d",
+};
+
+let dirNumbers = {
+    1: "n",
+    2: "ne",
+    3: "nw",
+    4: "e",
+    5: "w",
+    6: "s",
+    7: "se",
+    8: "sw",
+    9: "u",
+    10: "d",
 };
 
 function dirsShortToLong(dir) {
