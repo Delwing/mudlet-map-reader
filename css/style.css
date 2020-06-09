@@ -61,6 +61,19 @@ canvas {
     margin: 0 2px;
 }
 
-.levels, .save-image {
+.control {
     margin: 0 10px;
+}
+
+.toasts {
+    position: absolute;
+    width: 95%;
+    bottom: 50px;
+    margin-left: 2%;
+    z-index: 99;
+}
+
+.toast {
+    margin: 0 auto;
+    text-align: center;
 }

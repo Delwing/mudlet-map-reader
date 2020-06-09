@@ -9,6 +9,7 @@
     <script src="js/paper-full.min.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/jquery-mousewheel.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
     <script src="js/map.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="css/style.css" rel="stylesheet" type="text/css">
@@ -19,9 +20,17 @@
     <form>
         <select class="form-control" id="area"></select>
     </form>
-    <span class="levels btn-group btn-group-toggle"></span>
-    <span class="save-image btn btn-dark">Zapisz obraz</span>
+    <span class="control levels btn-group btn-group-toggle"></span>
+    <span class="control copy-image btn btn-dark">Kopiuj obraz</span>
+    <span class="control save-image btn btn-dark">Zapisz obraz</span>
 </header>
+<div class="toasts">
+    <div class="toast" data-delay="2000">
+        <div class="toast-body">
+            Skopiowano do schowka
+        </div>
+    </div>
+</div>
 <div class="map-container">
     <div class="info-box">
         <p>RoomID: <span class="room-id"></span></p>

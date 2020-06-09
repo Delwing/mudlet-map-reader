@@ -688,6 +688,7 @@ class Controls {
 
         this.levels = jQuery(".levels");
         this.saveImageButton = jQuery(".save-image");
+        this.copyImageButton = jQuery(".copy-image");
 
         this.activateMouseEvents();
         this.populateSelectBox(jQuery("#area"));
@@ -701,7 +702,11 @@ class Controls {
 
         this.saveImageButton.on("click", function () {
             that.saveImage();
-        })
+        });
+
+        this.copyImageButton.on("click", function () {
+            that.copyImage();
+        });
     }
 
     activateMouseEvents() {
@@ -798,6 +803,11 @@ class Controls {
             .appendTo("body");
         a[0].click();
         a.remove();
+    }
+
+    copyImage() {
+        this.canvas.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
+        jQuery('.toast').toast('show')
     }
 
 }
