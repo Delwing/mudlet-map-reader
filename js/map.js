@@ -505,7 +505,7 @@ class MapRenderer {
         text.fillColor = 'yellow';
         text.fontSize = 15;
         text.content = value.Text;
-        text.justification = 'left';
+        text.justification = 'center';
         text.locked = true;
         text.scale(1, -1)
     }
