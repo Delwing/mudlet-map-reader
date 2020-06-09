@@ -750,12 +750,12 @@ class Controls {
         jQuery(this.canvas).on('wheel mousewheel', function (e) {
             let oldZoom = view.zoom;
             if (e.originalEvent.deltaY / 240 > 0) {
-                that.zoom(0.9, new Point(e.originalEvent.x, e.originalEvent.y))
+                that.zoom(0.9)
             } else {
-                that.zoom(1.1, new Point(e.originalEvent.x, e.originalEvent.y))
+                that.zoom(1.1)
             }
 
-            let viewPos = view.viewToProject(point);
+            let viewPos = view.viewToProject(new Point(e.originalEvent.x, e.originalEvent.y));
             let zoomScale = oldZoom / view.zoom;
             let centerAdjust = viewPos.subtract(view.center);
             let offset = viewPos.subtract(centerAdjust.multiply(zoomScale))
