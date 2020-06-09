@@ -83,3 +83,10 @@ canvas {
     margin: 0 auto;
     text-align: center;
 }
+
+.zoom-controls {
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    color: white;
+}

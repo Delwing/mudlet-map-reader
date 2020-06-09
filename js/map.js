@@ -741,28 +741,33 @@ class Controls {
     }
 
     activateZoom() {
+        var that = this;
         jQuery(this.canvas).on('wheel mousewheel', function (e) {
-            let oldZoom = view.zoom;
             if (e.originalEvent.deltaY / 240 > 0) {
-                view.zoom *= 0.9;
+                that.zoom(0.9, new Point(e.originalEvent.x, e.originalEvent.y))
             } else {
-                view.zoom *= 1.1;
+                that.zoom(1.1, new Point(e.originalEvent.x, e.originalEvent.y))
             }
-
-            if (Math.abs(view.zoom - 1) < 0.05) {
-                view.zoom = 1;
-            }
-
-            view.zoom = Math.max(view.zoom, view.minZoom);
-
-            let viewPos = view.viewToProject(new Point(e.originalEvent.x, e.originalEvent.y));
-            let zoomScale = oldZoom / view.zoom;
-            let centerAdjust = viewPos.subtract(view.center);
-            let offset = viewPos.subtract(centerAdjust.multiply(zoomScale))
-                .subtract(view.center);
-
-            view.center = view.center.add(offset);
         });
+    }
+
+    zoom(factor, point) {
+        let oldZoom = view.zoom;
+        view.zoom *= factor;
+
+        if (Math.abs(view.zoom - 1) < 0.05) {
+            view.zoom = 1;
+        }
+
+        view.zoom = Math.min(Math.max(view.zoom, view.minZoom), 10);
+
+        let viewPos = view.viewToProject(point);
+        let zoomScale = oldZoom / view.zoom;
+        let centerAdjust = viewPos.subtract(view.center);
+        let offset = viewPos.subtract(centerAdjust.multiply(zoomScale))
+            .subtract(view.center);
+
+        view.center = view.center.add(offset);
     }
 
 
