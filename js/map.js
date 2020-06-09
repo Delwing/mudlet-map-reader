@@ -129,7 +129,13 @@ class MapRenderer {
             color = [114, 1, 0];
         }
         rectangle.fillColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255);
-        rectangle.strokeColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255);
+        let strokeColor
+        if (rectangle.fillColor.lightness > 0.1) {
+            strokeColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255)
+        } else {
+            strokeColor = new Color(0.3, 0.3, 0.3)
+        }
+        rectangle.strokeColor = strokeColor;
         rectangle.strokeWidth = 1;
 
         room.render = rectangle;
@@ -249,7 +255,6 @@ class MapRenderer {
             } else {
                 secondPoint = new Point(room1.getXMid(), room1.getYMid());
                 path = this.drawArrow(exitPoint, secondPoint, room1.render.fillColor, this.baseSize / 4);
-                path.strokeColor = envColors.default;
                 path.scale(3, exitPoint);
                 path.rotate(180, exitPoint);
                 let that = this;
@@ -369,7 +374,10 @@ class MapRenderer {
             arrow
         ]);
         path.closed = true;
-        path.fillColor = color;
+        arrow.fillColor = color;
+        arrow.strokeColor = color;
+        tailLine.fillColor = color
+        tailLine.strokeColor = color
 
         if (isOneWay) {
             arrow.position = new Point(lineStart.x + ((lineEnd.x - lineStart.x) / 2.8), lineStart.y + ((lineEnd.y - lineStart.y) / 2.8));
@@ -397,9 +405,9 @@ class MapRenderer {
         let path = new Path();
         let style = room.customLines[dir].attributes.style;
         if (style === "dot line") {
-            path.dashArray = [2, 2];
+            path.dashArray = [1, 1];
         } else if (style === "dash line") {
-            path.dashArray = [8, 8];
+            path.dashArray = [4, 2];
         } else if (style === "solid line") {
 
         } else {
@@ -462,7 +470,12 @@ class MapRenderer {
         myPath.add(new Point(room.getXMid(), room.getY() + sizeOffset - sizeOffset * height));
         myPath.add(new Point(oppositeOffset + room.getX(), room.getY() + sizeOffset));
         myPath.add(new Point(room.getX() + sizeOffset, room.getY() + sizeOffset));
-        myPath.fillColor = new Color(0.19, 0.19, 0.19, 0.6);
+
+        if (room.render.fillColor.lightness > 0.4) {
+            myPath.fillColor = new Color(0.20, 0.20, 0.20, 0.75);
+        } else {
+            myPath.fillColor = new Color(0.80, 0.80, 0.85, 0.75);
+        }
 
         myPath.locked = true;
 
@@ -529,6 +542,10 @@ class MapRenderer {
         text.justification = 'center';
         text.locked = true;
         text.scale(1, -1)
+    }
+
+    calculateLuminance(color) {
+        console.log(color)
     }
 }
 
@@ -799,7 +816,7 @@ class Controls {
     saveImage() {
         var a = jQuery("<a>")
             .attr("href", this.canvas.toDataURL())
-            .attr("download", this.renderer.area.areaName+ ".png")
+            .attr("download", this.renderer.area.areaName + ".png")
             .appendTo("body");
         a[0].click();
         a.remove();
