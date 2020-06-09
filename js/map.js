@@ -184,6 +184,7 @@ class MapRenderer {
     onRoomClick(room, rectangle) {
         this.clearSelection();
         let selectionColor = new Color(180 / 255, 93 / 255, 60 / 255);
+        rectangle.orgStrokeColor = rectangle.strokeColor
         rectangle.strokeColor = selectionColor;
         rectangle.strokeWidth = 1;
         this.roomSelected = room;
@@ -208,8 +209,7 @@ class MapRenderer {
 
     clearSelection() {
         if (this.roomSelected !== undefined) {
-            this.roomSelected.render.strokeColor = '';
-            this.roomSelected.render.strokeWidth = 0;
+            this.roomSelected.render.strokeColor = this.roomSelected.render.orgStrokeColor;
             this.roomSelected.exitRenders.forEach(path => {
                 if (path !== undefined) {
                     path.strokeColor = path.orgStrokeColor;
