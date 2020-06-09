@@ -696,6 +696,7 @@ class Controls {
         this.saveImageButton = jQuery(".save-image");
         this.copyImageButton = jQuery(".copy-image");
         this.zoomButton = jQuery(".zoom-controls .btn");
+        this.toastContainer = jQuery('.toast');
 
         this.activateMouseEvents();
         this.populateSelectBox(jQuery("#area"));
@@ -814,7 +815,7 @@ class Controls {
     }
 
     saveImage() {
-        var a = jQuery("<a>")
+        let a = jQuery("<a>")
             .attr("href", this.canvas.toDataURL())
             .attr("download", this.renderer.area.areaName + ".png")
             .appendTo("body");
@@ -823,8 +824,14 @@ class Controls {
     }
 
     copyImage() {
-        this.canvas.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
-        jQuery('.toast').toast('show')
+        let that = this;
+        if(typeof ClipboardItem !== "undefined") {
+            that.canvas.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
+            this.toastContainer.find(".toast-body").html("Skopiowano do schowka")
+        } else {
+            this.toastContainer.find(".toast-body").html("Twoja przeglądarka nie wspiera kopiowania do schowka")
+        }
+        this.toastContainer.toast('show')
     }
 
 }
