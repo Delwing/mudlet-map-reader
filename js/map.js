@@ -240,8 +240,8 @@ class MapRenderer {
                 path.strokeColor = envColors.default;
             } else {
                 secondPoint = new Point(room1.getXMid(), room1.getYMid());
-                path = this.drawArrow(exitPoint, secondPoint, envColors.default, this.baseSize / 4);
-                path.strokeColor = envColors.default;
+                path = this.drawArrow(exitPoint, secondPoint, room1.render.fillColor, this.baseSize / 4);
+                path.strokeColor = envColors.default
                 path.scale(3, exitPoint);
                 path.rotate(180, exitPoint);
                 let that = this;
