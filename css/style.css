@@ -57,6 +57,12 @@ canvas {
     cursor: all-scroll;
 }
 
+.levels-container {
+    display: inline-block;
+    width: 450px;
+    text-align: center;
+}
+
 .levels .btn {
     margin: 0 2px;
 }
