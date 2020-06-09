@@ -153,8 +153,8 @@ class MapRenderer {
         }
 
         room.stubRenders = [];
-        for(let dir in room.stubs) {
-            if(room.stubs.hasOwnProperty(dir)) {
+        for (let dir in room.stubs) {
+            if (room.stubs.hasOwnProperty(dir)) {
                 room.stubRenders.push(this.renderStub(room, dirNumbers[room.stubs[dir]], this.baseSize))
             }
         }
@@ -687,15 +687,21 @@ class Controls {
         this.zIndex = 0;
 
         this.levels = jQuery(".levels");
+        this.saveImageButton = jQuery(".save-image");
 
         this.activateMouseEvents();
         this.populateSelectBox(jQuery("#area"));
 
         let that = this;
+
         this.levels.on("click", ".btn-level", function () {
             that.zIndex = parseInt(jQuery(this).attr("data-level"));
             that.draw();
         });
+
+        this.saveImageButton.on("click", function () {
+            that.saveImage();
+        })
     }
 
     activateMouseEvents() {
@@ -783,6 +789,15 @@ class Controls {
         this.renderer = new MapRenderer(this.canvas, area, 1);
         this.renderer.render();
         view.draw();
+    }
+
+    saveImage() {
+        var a = jQuery("<a>")
+            .attr("href", this.canvas.toDataURL())
+            .attr("download", this.renderer.area.areaName+ ".png")
+            .appendTo("body");
+        a[0].click();
+        a.remove();
     }
 
 }
