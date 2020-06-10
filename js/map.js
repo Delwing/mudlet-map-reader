@@ -1,4 +1,6 @@
 //TODO tooltips for special exits
+let roomSize = 8
+
 
 let envColors = {};
 colors.forEach(function (element) {
@@ -524,7 +526,7 @@ class MapRenderer {
     }
 
     calculateCoordinates(coord) {
-        return coord * 1.1 * this.baseSize;
+        return coord * (10 / roomSize) * this.baseSize;
     }
 
     showRoomInfo(room) {
@@ -580,7 +582,7 @@ class Room {
     }
 
     calculateCoordinates(coord) {
-        return coord * 1.1 * this.baseSize - (this.baseSize / 2);
+        return coord * (10 / roomSize) * this.baseSize - (this.baseSize / 2);
     }
 
     getX() {
