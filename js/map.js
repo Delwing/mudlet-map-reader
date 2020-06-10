@@ -51,6 +51,8 @@ class MapRenderer {
     }
 
     render(highlights) {
+        this.hideRoomInfo();
+
         let textOffset = 80;
 
         let text = new PointText(new Point(0, 0));
