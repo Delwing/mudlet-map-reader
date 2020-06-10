@@ -76,7 +76,7 @@ class MapRenderer {
             this.area.labels.forEach(value => this.renderLabel(value), this);
         }
 
-        if (highlights !== null) {
+        if (highlights !== undefined) {
             highlights.forEach(value => this.renderHighlight(value));
         }
 
