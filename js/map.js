@@ -142,7 +142,7 @@ class MapRenderer {
         rectangle.strokeColor = strokeColor;
         rectangle.strokeWidth = 1;
 
-        room.render = new Group(rectangle);
+        room.render = rectangle;
         this.pointerReactor(room.render);
 
         room.exitRenders = [];
@@ -182,17 +182,18 @@ class MapRenderer {
         let that = this;
         room.render.onClick = function () {
             if (!that.isDrag) {
-                that.onRoomClick(room, rectangle);
+                that.onRoomClick(room);
             }
         };
     }
 
-    onRoomClick(room, rectangle) {
+    onRoomClick(room) {
+        console.log(room)
         this.clearSelection();
         let selectionColor = new Color(180 / 255, 93 / 255, 60 / 255);
-        rectangle.orgStrokeColor = rectangle.strokeColor;
-        rectangle.strokeColor = selectionColor;
-        rectangle.strokeWidth = 1;
+        room.render.orgStrokeColor = room.render.strokeColor;
+        room.render.strokeColor = selectionColor;
+        room.render.strokeWidth = 1;
         this.roomSelected = room;
         let exits = {...room.exits, ...room.specialExits};
 
@@ -237,7 +238,6 @@ class MapRenderer {
             circle.strokeColor = '#e8fdff';
             circle.strokeWidth = 5;
             circle.bringToFront();
-            room.render.addChild(circle);
         }
     }
 
@@ -751,6 +751,10 @@ class Controls {
             event.preventDefault();
             that.submitSearch(event);
         });
+
+        this.searchModal.on('shown.bs.modal', function () {
+            that.searchModal.find("input").first().focus();
+        })
     }
 
     activateMouseEvents() {
@@ -880,9 +884,10 @@ class Controls {
         if (formData.roomId !== undefined) {
             let room = roomIndex[parseInt(formData.roomId)];
             if (room !== undefined) {
-                this.draw(room.areaId, room.z, [room.id]);
+                this.draw(room.areaId, room.z);
                 this.zoom(6);
                 this.renderer.focus(room);
+                this.renderer.onRoomClick(roomIndex[parseInt(formData.roomId)])
             } else {
                 this.showToast("Nie znaleziono takiej lokacji")
             }
