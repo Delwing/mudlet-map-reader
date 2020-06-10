@@ -536,6 +536,7 @@ class MapRenderer {
 
         let special = infoBox.find(".special");
         let specialList = special.find("ul")
+        specialList.html("");
         let show = false;
         for (let exit in room.specialExits) {
             show = true;
