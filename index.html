@@ -29,7 +29,33 @@
     </span>
     <span class="control copy-image btn btn-dark">Kopiuj obraz</span>
     <span class="control save-image btn btn-dark">Zapisz obraz</span>
+    <span class="control search btn btn-dark" data-toggle="modal" data-target="#search">Szukaj</span>
 </header>
+<div class="modal fade" id="search" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form class="search-form">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Szukaj</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="search-id">ID Lokacji:</label>
+                        <input class="form-control" type="text" id="search-id" name="roomId">
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Szukaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <div class="toasts">
     <div class="toast" data-delay="2000">
         <div class="toast-body"></div>

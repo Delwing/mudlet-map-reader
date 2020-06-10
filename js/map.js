@@ -50,7 +50,7 @@ class MapRenderer {
         this.isDrag = false;
     }
 
-    render() {
+    render(highlights) {
         let textOffset = 80;
 
         let text = new PointText(new Point(0, 0));
@@ -76,9 +76,8 @@ class MapRenderer {
             this.area.labels.forEach(value => this.renderLabel(value), this);
         }
 
-        let toHighlight = params.get('highlights');
-        if (toHighlight !== null) {
-            toHighlight.split(",").forEach(value => this.renderHighlight(value));
+        if (highlights !== null) {
+            highlights.forEach(value => this.renderHighlight(value));
         }
 
         project.layers.forEach(function (layer) {
@@ -143,8 +142,8 @@ class MapRenderer {
         rectangle.strokeColor = strokeColor;
         rectangle.strokeWidth = 1;
 
-        room.render = rectangle;
-        this.pointerReactor(rectangle);
+        room.render = new Group(rectangle);
+        this.pointerReactor(room.render);
 
         room.exitRenders = [];
         for (let dir in room.exits) {
@@ -171,15 +170,17 @@ class MapRenderer {
         }
 
         for (let dir in room.customLines) {
-            room.exitRenders.push(this.renderCustomLine(room, dir))
+            room.exitRenders.push(this.renderCustomLine(room, dir));
         }
 
         if (room.roomChar !== undefined) {
             this.renderChar(room);
         }
 
+        roomIndex[room.id] = room;
+
         let that = this;
-        rectangle.onClick = function () {
+        room.render.onClick = function () {
             if (!that.isDrag) {
                 that.onRoomClick(room, rectangle);
             }
@@ -189,7 +190,7 @@ class MapRenderer {
     onRoomClick(room, rectangle) {
         this.clearSelection();
         let selectionColor = new Color(180 / 255, 93 / 255, 60 / 255);
-        rectangle.orgStrokeColor = rectangle.strokeColor
+        rectangle.orgStrokeColor = rectangle.strokeColor;
         rectangle.strokeColor = selectionColor;
         rectangle.strokeWidth = 1;
         this.roomSelected = room;
@@ -228,7 +229,7 @@ class MapRenderer {
     }
 
     renderHighlight(roomId) {
-        let room = new Room(this.area.getRoomById(roomId), this.baseSize);
+        let room = roomIndex[roomId]
         if (room.exists()) {
             this.labelsLayer.activate();
             let circle = new Path.Circle(new Point(room.getXMid(), room.getYMid()), this.baseSize * 0.40);
@@ -236,6 +237,7 @@ class MapRenderer {
             circle.strokeColor = '#e8fdff';
             circle.strokeWidth = 5;
             circle.bringToFront();
+            room.render.addChild(circle);
         }
     }
 
@@ -301,7 +303,6 @@ class MapRenderer {
     }
 
     onExitClick(room) {
-        jQuery("select").val(room.areaId);
         this.controls.draw(room.areaId, room.z)
     }
 
@@ -457,7 +458,7 @@ class MapRenderer {
         customLine.addChild(path);
 
         if (room.customLines[dir].attributes.arrow && path.segments.length > 1) {
-            let arrow = this.drawArrow(path.segments[path.segments.length - 2].point, path.segments[path.segments.length - 1].point, path.strokeColor,this.baseSize / 2, path.strokeColor, path.dashArray);
+            let arrow = this.drawArrow(path.segments[path.segments.length - 2].point, path.segments[path.segments.length - 1].point, path.strokeColor, this.baseSize / 2, path.strokeColor, path.dashArray);
             customLine.addChild(arrow);
         }
 
@@ -471,22 +472,22 @@ class MapRenderer {
 
 
         let sizeOffset = this.baseSize * 0.85;
-        let oppositeOffset = this.baseSize - sizeOffset
+        let oppositeOffset = this.baseSize - sizeOffset;
         let height = 0.35;
 
         myPath.add(new Point(room.getXMid(), room.getY() + sizeOffset - sizeOffset * height));
         myPath.add(new Point(oppositeOffset + room.getX(), room.getY() + sizeOffset));
         myPath.add(new Point(room.getX() + sizeOffset, room.getY() + sizeOffset));
 
-        let baseColor
+        let baseColor;
         if (room.render.fillColor.lightness > 0.4) {
             baseColor = 0.20;
         } else {
             baseColor = 0.80;
         }
 
-        myPath.fillColor = new Color(baseColor, baseColor, baseColor, 0.75)
-        myPath.strokeColor = new Color(baseColor, baseColor, baseColor)
+        myPath.fillColor = new Color(baseColor, baseColor, baseColor, 0.75);
+        myPath.strokeColor = new Color(baseColor, baseColor, baseColor);
 
         myPath.locked = true;
 
@@ -553,6 +554,10 @@ class MapRenderer {
         text.justification = 'center';
         text.locked = true;
         text.scale(1, -1)
+    }
+
+    focus(roomProperties) {
+        view.center = roomIndex[roomProperties.id].render.position
     }
 
 }
@@ -711,14 +716,17 @@ class Controls {
         this.areaId = 1;
         this.zIndex = 0;
 
+        this.select = jQuery("#area");
         this.levels = jQuery(".levels");
         this.saveImageButton = jQuery(".save-image");
         this.copyImageButton = jQuery(".copy-image");
         this.zoomButton = jQuery(".zoom-controls .btn");
         this.toastContainer = jQuery('.toast');
+        this.searchModal = jQuery('#search');
+        this.search = jQuery(".search-form");
 
         this.activateMouseEvents();
-        this.populateSelectBox(jQuery("#area"));
+        this.populateSelectBox(this.select);
 
         let that = this;
 
@@ -737,7 +745,12 @@ class Controls {
 
         this.zoomButton.on("click", function () {
             that.zoom(parseFloat(jQuery(this).attr("data-factor")), view.center);
-        })
+        });
+
+        this.search.on("submit", function (event) {
+            event.preventDefault();
+            that.submitSearch(event);
+        });
     }
 
     activateMouseEvents() {
@@ -770,9 +783,9 @@ class Controls {
         jQuery(this.canvas).on('wheel mousewheel', function (e) {
             let oldZoom = view.zoom;
             if (e.originalEvent.deltaY / 240 > 0) {
-                that.zoom(0.9)
+                that.zoom(0.9);
             } else {
-                that.zoom(1.1)
+                that.zoom(1.1);
             }
 
             let viewPos = view.viewToProject(new Point(e.originalEvent.x, e.originalEvent.y));
@@ -822,15 +835,16 @@ class Controls {
         }
     }
 
-    draw(areaId, zIndex) {
+    draw(areaId, zIndex, highlights) {
         project.clear();
         this.areaId = areaId;
         this.zIndex = zIndex;
         let area = this.reader.getArea(this.areaId, this.zIndex);
         this.populateLevelButtons(area.getLevels(), this.zIndex);
         this.renderer = new MapRenderer(this, this.canvas, area, 1);
-        this.renderer.render();
+        this.renderer.render(highlights);
         view.draw();
+        this.select.val(areaId);
     }
 
     saveImage() {
@@ -846,10 +860,37 @@ class Controls {
         let that = this;
         if (typeof ClipboardItem !== "undefined") {
             that.canvas.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
-            this.toastContainer.find(".toast-body").html("Skopiowano do schowka")
+            this.showToast("Skopiowano do schowka")
         } else {
-            this.toastContainer.find(".toast-body").html("Twoja przeglądarka nie wspiera kopiowania do schowka")
+            this.showToast("Twoja przeglądarka nie wspiera kopiowania do schowka")
         }
+        this.toastContainer.toast('show')
+    }
+
+    submitSearch(event) {
+        this.searchModal.modal('toggle');
+        let inputs = this.search.find(':input');
+
+        let formData = {};
+        inputs.each(function () {
+            formData[this.name] = jQuery(this).val();
+            jQuery(this).val("")
+        });
+
+        if (formData.roomId !== undefined) {
+            let room = roomIndex[parseInt(formData.roomId)];
+            if (room !== undefined) {
+                this.draw(room.areaId, room.z, [room.id]);
+                this.zoom(6);
+                this.renderer.focus(room);
+            } else {
+                this.showToast("Nie znaleziono takiej lokacji")
+            }
+        }
+    }
+
+    showToast(text) {
+        this.toastContainer.find(".toast-body").html(text);
         this.toastContainer.toast('show')
     }
 
@@ -865,8 +906,14 @@ jQuery(function () {
         area = position.area
     }
 
+
+    let highlights = [];
+    let toHighlight = params.get('highlights');
+    if (toHighlight !== null) {
+        highlights = toHighlight.split(",")
+    }
     let controls = new Controls(canvas, mapData);
-    controls.draw(area, 0);
+    controls.draw(area, 0, highlights);
     jQuery("select").val(area);
 
 });
