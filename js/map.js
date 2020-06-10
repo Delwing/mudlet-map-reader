@@ -33,7 +33,7 @@ rooms = [];
 
 class MapRenderer {
     constructor(canvas, area, scale) {
-        this.baseSize = 18;
+        this.baseSize = 20;
         this.ladders = ["up", "down"];
         this.canvas = canvas;
         this.area = area;
@@ -132,7 +132,7 @@ class MapRenderer {
             color = [114, 1, 0];
         }
         rectangle.fillColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255);
-        let strokeColor
+        let strokeColor;
         if (rectangle.fillColor.lightness > 0.1) {
             strokeColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255)
         } else {
@@ -178,7 +178,7 @@ class MapRenderer {
 
         let that = this;
         rectangle.onClick = function () {
-            if(!that.isDrag) {
+            if (!that.isDrag) {
                 that.onRoomClick(room, rectangle);
             }
         };
@@ -254,12 +254,12 @@ class MapRenderer {
                     path.moveTo(exitPoint);
                     path.lineTo(secondPoint);
                 } else {
-                    path = this.drawArrow(exitPoint, secondPoint, envColors.default, this.baseSize / 2, true);
+                    path = this.drawArrow(exitPoint, secondPoint, envColors.default, this.baseSize / 2, [], 2, envColors.default, true);
                 }
                 path.strokeColor = envColors.default;
             } else {
                 secondPoint = new Point(room1.getXMid(), room1.getYMid());
-                path = this.drawArrow(exitPoint, secondPoint, room1.render.fillColor, this.baseSize / 4);
+                path = this.drawArrow(exitPoint, secondPoint, room1.render.fillColor, this.baseSize / 4, [], 1);
                 path.scale(3, exitPoint);
                 path.rotate(180, exitPoint);
                 let that = this;
@@ -272,6 +272,8 @@ class MapRenderer {
             if (room1.doors[dirLongToShort(dir1)] !== undefined) {
                 this.renderDoors(exitPoint, secondPoint)
             }
+
+            path.strokeWidth = 1;
 
             return path;
         }
@@ -324,7 +326,7 @@ class MapRenderer {
                 path.strokeWidth = 1;
             } else {
                 secondPoint = new Point(room1.getXMid(), room1.getYMid());
-                path = this.drawArrow(exitPoint, secondPoint, envColors.default, this.baseSize / 4);
+                path = this.drawArrow(exitPoint, secondPoint, envColors.default, this.baseSize / 4, [], 1);
                 path.strokeColor = envColors.default;
                 path.scale(1, exitPoint);
                 path.rotate(180, exitPoint);
@@ -338,7 +340,7 @@ class MapRenderer {
         }
     }
 
-    drawArrow(exitPoint, secondPoint, color, sizeFactor, isOneWay) {
+    drawArrow(exitPoint, secondPoint, color, sizeFactor, dashArray, strokeWidth, strokeColor, isOneWay) {
         let headLength = sizeFactor;
         let headAngle = isOneWay ? 160 : 150;
 
@@ -364,15 +366,16 @@ class MapRenderer {
         path.closed = true;
         arrow.fillColor = color;
         arrow.strokeColor = color;
-        tailLine.fillColor = color
-        tailLine.strokeColor = color
+        tailLine.fillColor = strokeColor ? strokeColor : color;
+        tailLine.strokeColor = strokeColor ? strokeColor : color;
+        tailLine.dashArray = dashArray;
 
         if (isOneWay) {
             arrow.position = new Point(lineStart.x + ((lineEnd.x - lineStart.x) / 2.8), lineStart.y + ((lineEnd.y - lineStart.y) / 2.8));
             tailLine.dashArray = [1, 1];
             arrow.fillColor = 'red'
         } else {
-            tailLine.strokeWidth = 2;
+            tailLine.strokeWidth = strokeWidth;
         }
 
 
@@ -380,6 +383,11 @@ class MapRenderer {
     }
 
     renderCustomLine(room, dir) {
+
+        if (room.customLines[dir].points !== undefined && room.customLines[dir].points.length === 0) {
+            return
+        }
+
         this.linkLayer.activate();
 
         let customLine = new Group();
@@ -403,6 +411,7 @@ class MapRenderer {
         } else {
             console.log("Brak opisu stylu: " + style);
         }
+
 
         if (room.customLines[dir].attributes.color !== undefined) {
             let color = room.customLines[dir].attributes.color;
@@ -429,19 +438,19 @@ class MapRenderer {
         }
 
         if (roomConnected !== undefined && roomConnected.exists()) {
-            lastPoint = new Point(roomConnected.getXMid(), roomConnected.getYMid());
-            path.lineTo(lastPoint);
-            let tempRender = new Path.Rectangle(roomConnected.getX(), roomConnected.getY(), this.baseSize, this.baseSize);
-            let intersections = path.getIntersections(tempRender);
-            if (intersections.length > 0) {
-                path.getLastSegment().point = intersections[intersections.length - 1].point;
-            }
+            // lastPoint = new Point(roomConnected.getXMid(), roomConnected.getYMid());
+            // path.lineTo(lastPoint);
+            // let tempRender = new Path.Rectangle(roomConnected.getX(), roomConnected.getY(), this.baseSize, this.baseSize);
+            // let intersections = path.getIntersections(tempRender);
+            // if (intersections.length > 0) {
+            //     path.getLastSegment().point = intersections[intersections.length - 1].point;
+            // }
         }
 
         customLine.addChild(path);
 
         if (room.customLines[dir].attributes.arrow && path.segments.length > 1) {
-            let arrow = this.drawArrow(path.segments[path.segments.length - 1].point, path.segments[path.segments.length - 2].point, path.strokeColor, this.baseSize / 2);
+            let arrow = this.drawArrow(path.segments[path.segments.length - 2].point, path.segments[path.segments.length - 1].point, path.strokeColor,this.baseSize / 2, path.strokeColor, path.dashArray);
             customLine.addChild(arrow);
         }
 
@@ -828,7 +837,7 @@ class Controls {
 
     copyImage() {
         let that = this;
-        if(typeof ClipboardItem !== "undefined") {
+        if (typeof ClipboardItem !== "undefined") {
             that.canvas.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
             this.toastContainer.find(".toast-body").html("Skopiowano do schowka")
         } else {
