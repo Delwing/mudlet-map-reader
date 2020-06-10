@@ -190,7 +190,7 @@ class MapRenderer {
 
     onRoomClick(room) {
         this.clearSelection();
-        let selectionColor = '#85d3ff'
+        let selectionColor = new Color(180 / 255, 93 / 255, 60 / 255, 0.9);
         room.render.orgStrokeColor = room.render.strokeColor;
         room.render.strokeColor = selectionColor;
         this.roomSelected = room;
