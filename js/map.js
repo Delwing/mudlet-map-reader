@@ -21,18 +21,20 @@ mapData.sort(function (areaElement1, areaElement2) {
 });
 
 let mapDataIndex = {};
-let roomAreaIndex = {};
+let roomIndex = {};
 mapData.forEach(function (value, index) {
     mapDataIndex[value.areaId] = index;
     value.rooms.forEach(room => {
-        roomAreaIndex[room.id] = value.areaId;
+        room.areaId = value.areaId;
+        roomIndex[room.id] = room;
     });
 });
 
 rooms = [];
 
 class MapRenderer {
-    constructor(canvas, area, scale) {
+    constructor(controls, canvas, area, scale) {
+        this.controls = controls;
         this.baseSize = 20;
         this.ladders = ["up", "down"];
         this.canvas = canvas;
@@ -259,12 +261,17 @@ class MapRenderer {
                 path.strokeColor = envColors.default;
             } else {
                 secondPoint = new Point(room1.getXMid(), room1.getYMid());
-                path = this.drawArrow(exitPoint, secondPoint, room1.render.fillColor, this.baseSize / 4, [], 1);
+                let roomProperties = roomIndex[exit];
+                let color = envColors[roomProperties.env];
+                if (color === undefined) {
+                    color = [114, 1, 0];
+                }
+                path = this.drawArrow(exitPoint, secondPoint, new Color(color[0] / 255, color[1] / 255, color[2] / 255), this.baseSize / 4, [], 1);
                 path.scale(3, exitPoint);
                 path.rotate(180, exitPoint);
                 let that = this;
                 path.onClick = function () {
-                    that.onExitClick(exit)
+                    that.onExitClick(roomProperties)
                 };
                 this.pointerReactor(path);
             }
@@ -294,8 +301,8 @@ class MapRenderer {
     }
 
     onExitClick(room) {
-        let select = jQuery("select").val(roomAreaIndex[room]);
-        select.trigger('change');
+        jQuery("select").val(room.areaId);
+        this.controls.draw(room.areaId, room.z)
     }
 
     pointerReactor(path) {
@@ -716,8 +723,8 @@ class Controls {
         let that = this;
 
         this.levels.on("click", ".btn-level", function () {
-            that.zIndex = parseInt(jQuery(this).attr("data-level"));
-            that.draw();
+            let zIndex = parseInt(jQuery(this).attr("data-level"));
+            that.draw(that.areaId, zIndex);
         });
 
         this.saveImageButton.on("click", function () {
@@ -794,9 +801,7 @@ class Controls {
         });
         let that = this;
         select.on("change", function (event) {
-            that.areaId = jQuery(this).val();
-            that.zIndex = 0;
-            that.draw();
+            that.draw(jQuery(this).val(), 0);
         })
     }
 
@@ -817,11 +822,13 @@ class Controls {
         }
     }
 
-    draw() {
+    draw(areaId, zIndex) {
         project.clear();
+        this.areaId = areaId;
+        this.zIndex = zIndex;
         let area = this.reader.getArea(this.areaId, this.zIndex);
         this.populateLevelButtons(area.getLevels(), this.zIndex);
-        this.renderer = new MapRenderer(this.canvas, area, 1);
+        this.renderer = new MapRenderer(this, this.canvas, area, 1);
         this.renderer.render();
         view.draw();
     }
@@ -853,15 +860,15 @@ jQuery(function () {
     paper.setup(canvas);
     paper.install(window);
 
-    let controls = new Controls(canvas, mapData);
-    controls.draw();
-
     let area = params.get('area');
     if (area == null) {
         area = position.area
     }
-    let select = jQuery("select").val(area);
-    select.trigger('change');
+
+    let controls = new Controls(canvas, mapData);
+    controls.draw(area, 0);
+    jQuery("select").val(area);
+
 });
 
 function getKeyByValue(obj, val) {
