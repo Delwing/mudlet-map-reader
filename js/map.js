@@ -126,6 +126,7 @@ class MapRenderer {
 
     renderRoom(room) {
         this.roomLayer.activate();
+        let strokeWidth = 4;
         let size = this.baseSize;
         let rectangle = new Path.Rectangle(room.getX(), room.getY(), size, size);
         let color = envColors[room.env];
@@ -140,7 +141,7 @@ class MapRenderer {
             strokeColor = new Color(0.3, 0.3, 0.3)
         }
         rectangle.strokeColor = strokeColor;
-        rectangle.strokeWidth = 1;
+        rectangle.strokeWidth = strokeWidth;
 
         room.render = rectangle;
         this.pointerReactor(room.render);
@@ -188,12 +189,10 @@ class MapRenderer {
     }
 
     onRoomClick(room) {
-        console.log(room)
         this.clearSelection();
-        let selectionColor = new Color(180 / 255, 93 / 255, 60 / 255);
+        let selectionColor = '#85d3ff'
         room.render.orgStrokeColor = room.render.strokeColor;
         room.render.strokeColor = selectionColor;
-        room.render.strokeWidth = 1;
         this.roomSelected = room;
         let exits = {...room.exits, ...room.specialExits};
 
@@ -527,18 +526,22 @@ class MapRenderer {
     }
 
     showRoomInfo(room) {
-        let infBox = jQuery(".info-box");
-        infBox.toggle(true);
-        infBox.find(".room-id").html(room.id);
-        infBox.find(".room-name").html(room.name);
-        infBox.find(".coord-x").html(room.x);
-        infBox.find(".coord-y").html(room.y);
-        infBox.find(".coord-z").html(room.z);
-        let special = infBox.find(".special");
-        special.html("<ul></ul>");
+        let infoBox = jQuery(".info-box");
+        infoBox.toggle(true);
+        infoBox.find(".room-id").html(room.id);
+        infoBox.find(".room-name").html(room.name);
+        infoBox.find(".coord-x").html(room.x);
+        infoBox.find(".coord-y").html(room.y);
+        infoBox.find(".coord-z").html(room.z);
+
+        let special = infoBox.find(".special");
+        let specialList = special.find("ul")
+        let show = false;
         for (let exit in room.specialExits) {
-            special.append("<li>" + exit + " : " + room.specialExits[exit] + "</li>")
+            show = true;
+            specialList.append("<li>" + exit + " : " + room.specialExits[exit] + "</li>")
         }
+        special.toggle(show)
     }
 
     hideRoomInfo() {
@@ -887,7 +890,7 @@ class Controls {
                 this.draw(room.areaId, room.z);
                 this.zoom(6);
                 this.renderer.focus(room);
-                this.renderer.onRoomClick(roomIndex[parseInt(formData.roomId)])
+                this.renderer.onRoomClick(roomIndex[parseInt(formData.roomId)]);
             } else {
                 this.showToast("Nie znaleziono takiej lokacji")
             }
