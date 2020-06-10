@@ -846,6 +846,7 @@ class Controls {
     }
 
     draw(areaId, zIndex, highlights) {
+        view.zoom = 1;
         project.clear();
         this.areaId = areaId;
         this.zIndex = zIndex;
