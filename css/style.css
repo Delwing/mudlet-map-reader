@@ -109,3 +109,17 @@ canvas {
     z-index: 99;
 }
 
+.progress-container {
+    position: relative;
+    height: 3px;
+    margin-top: 2px;
+    margin-bottom: -5px;
+    z-index: 99;
+    display: none;
+    opacity: 0.5;
+}
+
+.progress {
+    height: 5px;
+    justify-content: center;
+}

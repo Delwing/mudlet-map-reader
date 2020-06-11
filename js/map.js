@@ -733,6 +733,7 @@ class Controls {
         this.searchModal = jQuery('#search');
         this.search = jQuery(".search-form");
         this.helpModal = jQuery("#help");
+        this.zoomBar = jQuery(".progress-container")
 
         this.activateMouseEvents();
         this.populateSelectBox(this.select);
@@ -869,6 +870,8 @@ class Controls {
                 .subtract(view.center);
 
             view.center = view.center.add(offset);
+
+            that.adjustZoomBar();
         });
     }
 
@@ -879,6 +882,29 @@ class Controls {
         }
 
         view.zoom = Math.min(Math.max(view.zoom, view.minZoom), 10);
+
+        this.adjustZoomBar()
+    }
+
+    adjustZoomBar() {
+        let percentage = (view.zoom - view.minZoom) / (10 - view.minZoom);
+
+        this.zoomBar.find(".progress-bar").css("width", (percentage * 100) + "%");
+        let that = this;
+        if(!this.zoomBar.is(":visible")) {
+            this.zoomBar.fadeIn();
+            this.progressTimeout = setTimeout(function () {
+                that.zoomBar.fadeOut();
+            }, 3000);
+        } else {
+            if(this.progressTimeout !== undefined) {
+                clearTimeout(this.progressTimeout);
+                this.progressTimeout = undefined;
+            }
+            this.progressTimeout = setTimeout(function () {
+                that.zoomBar.fadeOut('slow');
+            }, 3000);
+        }
     }
 
     move(x, y) {
