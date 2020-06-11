@@ -732,6 +732,7 @@ class Controls {
         this.toastContainer = jQuery('.toast');
         this.searchModal = jQuery('#search');
         this.search = jQuery(".search-form");
+        this.helpModal = jQuery("#help");
 
         this.activateMouseEvents();
         this.populateSelectBox(this.select);
@@ -765,8 +766,62 @@ class Controls {
         });
 
         window.addEventListener("keydown", function keydown(event) {
+            if (event.code === "F1") {
+                that.showHelp();
+                event.preventDefault();
+            }
+        });
+
+        window.addEventListener("keydown", function keydown(event) {
             if (event.ctrlKey && event.code === "KeyF") {
                 that.showSearch();
+                event.preventDefault();
+            }
+        });
+
+        window.addEventListener("keydown", function keydown(event) {
+            if (event.ctrlKey && event.code === "KeyC") {
+                that.copyImage();
+                event.preventDefault();
+            }
+        });
+
+        window.addEventListener("keydown", function keydown(event) {
+            if (event.ctrlKey && event.code === "KeyS") {
+                that.saveImage();
+                event.preventDefault();
+            }
+        });
+
+        window.addEventListener("keydown", function keydown(event) {
+            if (event.code === "Equal") {
+                that.zoom(1.1);
+                event.preventDefault();
+            }
+        });
+
+        window.addEventListener("keydown", function keydown(event) {
+            if (event.code === "Minus") {
+                that.zoom(0.9);
+                event.preventDefault();
+            }
+        });
+
+        window.addEventListener("keydown", function keydown(event) {
+            if (event.code === "ArrowUp") {
+                that.move(0, -1);
+                event.preventDefault();
+            }
+            if (event.code === "ArrowDown") {
+                that.move(0, 1);
+                event.preventDefault();
+            }
+            if (event.code === "ArrowLeft") {
+                that.move(-1, 0);
+                event.preventDefault();
+            }
+            if (event.code === "ArrowRight") {
+                that.move(1, 0);
                 event.preventDefault();
             }
         });
@@ -824,6 +879,10 @@ class Controls {
         }
 
         view.zoom = Math.min(Math.max(view.zoom, view.minZoom), 10);
+    }
+
+    move(x, y) {
+        view.scrollBy(new Point(x * 20, y * 20));
     }
 
 
@@ -917,6 +976,10 @@ class Controls {
     showToast(text) {
         this.toastContainer.find(".toast-body").html(text);
         this.toastContainer.toast('show')
+    }
+
+    showHelp() {
+        this.helpModal.modal('show');
     }
 
 }
