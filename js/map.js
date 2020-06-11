@@ -129,7 +129,7 @@ class MapRenderer {
     renderRoom(room) {
         this.roomLayer.activate();
         let strokeWidth = 1;
-        let size = this.baseSize - 1;
+        let size = this.baseSize;
         let rectangle = new Path.Rectangle(room.getX(), room.getY(), size, size);
         let color = envColors[room.env];
         if (color === undefined) {
