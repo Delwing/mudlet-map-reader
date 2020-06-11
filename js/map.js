@@ -1016,10 +1016,12 @@ jQuery(function () {
     paper.install(window);
 
     let area = params.get('area');
-    if (area == null) {
+    if (!area) {
         area = position.area
     }
-
+    if (!area) {
+        area = 1;
+    }
 
     let highlights = [];
     let toHighlight = params.get('highlights');
