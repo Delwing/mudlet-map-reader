@@ -146,7 +146,8 @@ class MapRenderer {
         rectangle.strokeWidth = strokeWidth;
 
         room.render = rectangle;
-        room.render.orgStrokeColor = room.render.strokeColor
+        room.render.orgStrokeColor = room.render.strokeColor;
+        room.render.orgFillColor = room.render.fillColor;
         this.pointerReactor(room.render);
 
         room.exitRenders = [];
@@ -199,8 +200,9 @@ class MapRenderer {
 
     onRoomClick(room) {
         this.clearSelection();
-        let mainSelectionColor = new Color(255 / 255, 255 / 255, 60 / 255, 0.9);
-        let supportSelectionColor = new Color(180 / 255, 93 / 255, 60 / 255, 0.9);
+        let mainSelectionColor = new Color(180 / 255, 93 / 255, 60 / 255, 0.9);
+        let gradient = new Gradient([[room.render.fillColor,0.38], new Color(1,1,1) ], false)
+        room.render.fillColor = new Color(gradient, room.render.bounds.topCenter, room.render.bounds.bottomCenter);
         room.render.strokeColor = mainSelectionColor;
         this.roomSelected = room;
 
@@ -231,6 +233,7 @@ class MapRenderer {
     clearSelection() {
         if (this.roomSelected !== undefined) {
             this.roomSelected.render.strokeColor = this.roomSelected.render.orgStrokeColor;
+            this.roomSelected.render.fillColor = this.roomSelected.render.orgFillColor;
             let room = this.roomSelected
             room.exitRenders.forEach(exit => {
                 let path = exit.render;
