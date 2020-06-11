@@ -477,16 +477,6 @@ class MapRenderer {
             }
         }
 
-        if (roomConnected !== undefined && roomConnected.exists()) {
-            // lastPoint = new Point(roomConnected.getXMid(), roomConnected.getYMid());
-            // path.lineTo(lastPoint);
-            // let tempRender = new Path.Rectangle(roomConnected.getX(), roomConnected.getY(), this.baseSize, this.baseSize);
-            // let intersections = path.getIntersections(tempRender);
-            // if (intersections.length > 0) {
-            //     path.getLastSegment().point = intersections[intersections.length - 1].point;
-            // }
-        }
-
         customLine.addChild(path);
 
         if (room.customLines[dir].attributes.arrow && path.segments.length > 1) {
