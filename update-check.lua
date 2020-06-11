@@ -44,6 +44,6 @@ end
 MapExporter.updateCheck.coroutine = coroutine.create(function()
     MapExporter.updateCheck:checkNewVersion()
 end)
-coroutine.resume(MapExporter.updateCheck.coroutine)
+tempTimer(5, function() coroutine.resume(MapExporter.updateCheck.coroutine) end)
 
 
