@@ -762,7 +762,14 @@ class Controls {
 
         this.searchModal.on('shown.bs.modal', function () {
             that.searchModal.find("input").first().focus();
-        })
+        });
+
+        window.addEventListener("keydown", function keydown(event) {
+            if (event.ctrlKey && event.code === "KeyF") {
+                that.showSearch();
+                event.preventDefault();
+            }
+        });
     }
 
     activateMouseEvents() {
@@ -878,6 +885,10 @@ class Controls {
             this.showToast("Twoja przeglądarka nie wspiera kopiowania do schowka")
         }
         this.toastContainer.toast('show')
+    }
+
+    showSearch() {
+        this.searchModal.modal('show');
     }
 
     submitSearch(event) {
