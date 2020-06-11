@@ -1,6 +1,4 @@
-//TODO tooltips for special exits
 let roomSize = 8
-
 
 let envColors = {};
 colors.forEach(function (element) {
@@ -148,22 +146,29 @@ class MapRenderer {
         rectangle.strokeWidth = strokeWidth;
 
         room.render = rectangle;
+        room.render.orgStrokeColor = room.render.strokeColor
         this.pointerReactor(room.render);
 
         room.exitRenders = [];
         for (let dir in room.exits) {
             if (this.ladders.indexOf(dir) <= -1) {
                 if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
-                    room.exitRenders.push(this.renderLink(room, dir, new Room(this.area.getRoomById(room.exits[dir]), this.baseSize), room.exits[dir]));
+                    room.exitRenders.push({
+                        roomId: room.exits[dir],
+                        render: this.renderLink(room, dir, new Room(this.area.getRoomById(room.exits[dir]), this.baseSize), room.exits[dir])
+                    });
                 }
             } else {
-                this.renderLadder(room, dir);
+                room.exitRenders.push({roomId: room.exits[dir], render: this.renderLadder(room, dir)});
             }
         }
 
         for (let dir in room.specialExits) {
             if (room.specialExits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dir)) {
-                room.exitRenders.push(this.renderSpecialLink(room, dir, new Room(this.area.getRoomById(room.specialExits[dir]), this.baseSize)))
+                room.exitRenders.push({
+                    roomId: room.specialExits[dir],
+                    render: this.renderSpecialLink(room, dir, new Room(this.area.getRoomById(room.specialExits[dir]), this.baseSize))
+                });
             }
         }
 
@@ -175,7 +180,7 @@ class MapRenderer {
         }
 
         for (let dir in room.customLines) {
-            room.exitRenders.push(this.renderCustomLine(room, dir));
+            room.exitRenders.push({render: this.renderCustomLine(room, dir)});
         }
 
         if (room.roomChar !== undefined) {
@@ -194,37 +199,55 @@ class MapRenderer {
 
     onRoomClick(room) {
         this.clearSelection();
-        let selectionColor = new Color(180 / 255, 93 / 255, 60 / 255, 0.9);
-        room.render.orgStrokeColor = room.render.strokeColor;
-        room.render.strokeColor = selectionColor;
+        let mainSelectionColor = new Color(255 / 255, 255 / 255, 60 / 255, 0.9);
+        let supportSelectionColor = new Color(180 / 255, 93 / 255, 60 / 255, 0.9);
+        room.render.strokeColor = mainSelectionColor;
         this.roomSelected = room;
-        let exits = {...room.exits, ...room.specialExits};
 
-        room.exitRenders.forEach(path => {
+        room.exitRenders.forEach(exit => {
+            let path = exit.render;
             if (path !== undefined) {
                 path.bringToFront();
                 path.orgStrokeColor = path.strokeColor;
-                path.strokeColor = selectionColor;
-                path.strokeWidth = 1;
+                path.strokeColor = mainSelectionColor;
+            }
+            let neighbourRoom = roomIndex[exit.roomId]
+            if (neighbourRoom && neighbourRoom.exists() && exit.roomId !== room.id) {
+                //neighbourRoom.render.strokeColor = supportSelectionColor;
+                neighbourRoom.exitRenders.forEach(exit => {
+                    if (room.id === exit.roomId) {
+                        let path = exit.render;
+                        if (path !== undefined) {
+                            path.strokeColor = mainSelectionColor;
+                        }
+                    }
+                });
             }
         });
 
-        //TODO add highlight for connected rooms
-        this.roomsConnectedSelection = [];
-        for (let key in exits) {
-            //console.log(exits[key]);
-        }
         this.showRoomInfo(room)
     }
 
     clearSelection() {
         if (this.roomSelected !== undefined) {
             this.roomSelected.render.strokeColor = this.roomSelected.render.orgStrokeColor;
-            this.roomSelected.exitRenders.forEach(path => {
+            let room = this.roomSelected
+            room.exitRenders.forEach(exit => {
+                let path = exit.render;
                 if (path !== undefined) {
                     path.strokeColor = path.orgStrokeColor;
-                    path.bringToFront();
-                    path.strokeWidth = 1;
+                }
+                let neighbourRoom = roomIndex[exit.roomId]
+                if (neighbourRoom && neighbourRoom.exists()) {
+                    neighbourRoom.render.strokeColor = neighbourRoom.render.orgStrokeColor;
+                    neighbourRoom.exitRenders.forEach(exit => {
+                        if (room.id === exit.roomId) {
+                            let path = exit.render;
+                            if (path !== undefined) {
+                                path.strokeColor = path.orgStrokeColor;
+                            }
+                        }
+                    });
                 }
             });
         }
@@ -286,6 +309,7 @@ class MapRenderer {
             }
 
             path.strokeWidth = 1;
+            path.orgStrokeColor = path.strokeColor;
 
             return path;
         }
@@ -346,6 +370,8 @@ class MapRenderer {
             if (room1.doors[dirLongToShort(dir1)] !== undefined) {
                 this.renderDoors(exitPoint, secondPoint)
             }
+
+            path.orgStrokeColor = path.strokeColor;
 
             return path;
         }
@@ -465,6 +491,8 @@ class MapRenderer {
             customLine.addChild(arrow);
         }
 
+        path.orgStrokeColor = path.strokeColor;
+
         return path;
 
     }
@@ -501,6 +529,8 @@ class MapRenderer {
         }
 
         myPath.closed = true;
+
+        return myPath;
     }
 
     renderDoors(firstPoint, secondPoint) {
@@ -781,6 +811,9 @@ class Controls {
         });
 
         window.addEventListener("keydown", function keydown(event) {
+            if(jQuery("input").is(":focus")) {
+                return;
+            }
             if (event.ctrlKey && event.code === "KeyC") {
                 that.copyImage();
                 event.preventDefault();
@@ -809,6 +842,9 @@ class Controls {
         });
 
         window.addEventListener("keydown", function keydown(event) {
+            if(jQuery("input").is(":focus")) {
+                return;
+            }
             if (event.code === "ArrowUp") {
                 that.move(0, -1);
                 event.preventDefault();
@@ -891,13 +927,13 @@ class Controls {
 
         this.zoomBar.find(".progress-bar").css("width", (percentage * 100) + "%");
         let that = this;
-        if(!this.zoomBar.is(":visible")) {
+        if (!this.zoomBar.is(":visible")) {
             this.zoomBar.fadeIn();
             this.progressTimeout = setTimeout(function () {
                 that.zoomBar.fadeOut();
             }, 3000);
         } else {
-            if(this.progressTimeout !== undefined) {
+            if (this.progressTimeout !== undefined) {
                 clearTimeout(this.progressTimeout);
                 this.progressTimeout = undefined;
             }
