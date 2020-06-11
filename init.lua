@@ -1,3 +1,5 @@
 return {
-	"map-exporter"
+	"state_store",
+	"map-exporter",
+	"update-check"
 }
