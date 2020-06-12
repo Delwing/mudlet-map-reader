@@ -878,6 +878,11 @@ class Controls {
                 that.move(1, 0);
                 event.preventDefault();
             }
+
+        });
+
+        jQuery(window).on("resize", function () {
+            that.redraw()
         });
     }
 
@@ -1003,6 +1008,10 @@ class Controls {
         this.renderer.render(highlights);
         view.draw();
         this.select.val(areaId);
+    }
+
+    redraw() {
+        this.draw(this.areaId, this.zIndex);
     }
 
     saveImage() {
