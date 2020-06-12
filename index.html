@@ -31,6 +31,7 @@
     <button class="control save-image btn btn-dark">Zapisz obraz</button>
     <button class="control search btn btn-dark" data-toggle="modal" data-target="#search">Szukaj</button>
     <button class="control help btn btn-dark" data-toggle="modal" data-target="#help">Pomoc</button>
+    <button class="control settings btn btn-dark" data-toggle="modal" data-target="#settings"><img src="images/gear-fill.svg" alt="gear"></button>
 </header>
 <div class="progress-container">
     <div class="progress">
@@ -48,15 +49,47 @@
                     </button>
                 </div>
                 <div class="modal-body">
-
                     <div class="form-group">
                         <label for="search-id">ID Lokacji:</label>
                         <input class="form-control" type="text" id="search-id" name="roomId">
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Szukaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="settings" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form class="settings-form">
+                <div class="modal-header">
+                    <h5 class="modal-title">Ustawienia</h5>
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <label for="location-size">Wielkość lokacji</label>
+                        <input class="form-control" type="text" id="location-size" name="locationSize">
+                    </div>
+                    <div class="form-group">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="borders" value="1" id="borders-check">
+                            <label class="form-check-label" for="borders-check">
+                                Krawędzie lokacji
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Zapisz</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Anuluj</button>
                 </div>
             </form>
         </div>

@@ -1,4 +1,13 @@
-let roomSize = 8
+let settings = {
+    roomSize: 8,
+    baseSize: 20,
+    borders: true
+}
+
+let loaded = getCookie("settings");
+if (loaded) {
+    settings = JSON.parse(loaded);
+}
 
 let envColors = {};
 colors.forEach(function (element) {
@@ -6,9 +15,7 @@ colors.forEach(function (element) {
 });
 envColors.default = 'white';
 
-
 let params = new URLSearchParams(location.search);
-
 
 mapData.sort(function (areaElement1, areaElement2) {
     if (areaElement1.areaName < areaElement2.areaName) {
@@ -35,7 +42,7 @@ rooms = [];
 class MapRenderer {
     constructor(controls, canvas, area, scale) {
         this.controls = controls;
-        this.baseSize = 20;
+        this.baseSize = settings.baseSize;
         this.ladders = ["up", "down"];
         this.canvas = canvas;
         this.area = area;
@@ -145,6 +152,10 @@ class MapRenderer {
         rectangle.strokeColor = strokeColor;
         rectangle.strokeWidth = strokeWidth;
 
+        if (settings.borders) {
+            rectangle.strokeColor = new Color(0.8, 0.8, 0.8);
+        }
+
         room.render = rectangle;
         room.render.orgStrokeColor = room.render.strokeColor;
         room.render.orgFillColor = room.render.fillColor;
@@ -201,7 +212,7 @@ class MapRenderer {
     onRoomClick(room) {
         this.clearSelection();
         let mainSelectionColor = new Color(180 / 255, 93 / 255, 60 / 255, 0.9);
-        let gradient = new Gradient([[room.render.fillColor,0.38], new Color(1,1,1) ], false)
+        let gradient = new Gradient([[room.render.fillColor, 0.38], new Color(1, 1, 1)], false)
         room.render.fillColor = new Color(gradient, room.render.bounds.topCenter, room.render.bounds.bottomCenter);
         room.render.strokeColor = mainSelectionColor;
         this.roomSelected = room;
@@ -549,7 +560,7 @@ class MapRenderer {
     }
 
     calculateCoordinates(coord) {
-        return coord * (10 / roomSize) * this.baseSize;
+        return coord * (10 / settings.roomSize) * this.baseSize;
     }
 
     showRoomInfo(room) {
@@ -605,7 +616,7 @@ class Room {
     }
 
     calculateCoordinates(coord) {
-        return coord * (10 / roomSize) * this.baseSize - (this.baseSize / 2);
+        return coord * (10 / settings.roomSize) * this.baseSize - (this.baseSize / 2);
     }
 
     getX() {
@@ -756,10 +767,13 @@ class Controls {
         this.searchModal = jQuery('#search');
         this.search = jQuery(".search-form");
         this.helpModal = jQuery("#help");
-        this.zoomBar = jQuery(".progress-container")
+        this.zoomBar = jQuery(".progress-container");
+        this.settingsModal = jQuery("#settings");
+        this.settings = jQuery("#settings form");
 
         this.activateMouseEvents();
         this.populateSelectBox(this.select);
+        this.populateSettings();
 
         let that = this;
 
@@ -789,6 +803,16 @@ class Controls {
             that.searchModal.find("input").first().focus();
         });
 
+        this.settingsModal.on('shown.bs.modal', function () {
+            that.populateSettings();
+            that.settingsModal.find("input").first().focus();
+        });
+
+        this.settings.on("submit", function (event) {
+            event.preventDefault();
+            that.handleSaveSettings();
+        })
+
         window.addEventListener("keydown", function keydown(event) {
             if (event.code === "F1") {
                 that.showHelp();
@@ -804,7 +828,7 @@ class Controls {
         });
 
         window.addEventListener("keydown", function keydown(event) {
-            if(jQuery("input").is(":focus")) {
+            if (jQuery("input").is(":focus")) {
                 return;
             }
             if (event.ctrlKey && event.code === "KeyC") {
@@ -835,7 +859,7 @@ class Controls {
         });
 
         window.addEventListener("keydown", function keydown(event) {
-            if(jQuery("input").is(":focus")) {
+            if (jQuery("input").is(":focus")) {
                 return;
             }
             if (event.code === "ArrowUp") {
@@ -1037,6 +1061,29 @@ class Controls {
         this.helpModal.modal('show');
     }
 
+    handleSaveSettings() {
+        let inputs = this.settingsModal.find(':input');
+
+        let formData = {};
+        inputs.each(function () {
+            formData[this.name] = jQuery(this).val();
+            jQuery(this).val("")
+        });
+
+        this.showToast("Zapisano ustawienia")
+        settings.roomSize = parseInt(formData.locationSize);
+        settings.borders = this.settingsModal.find("#borders-check").is(":checked");
+        this.draw(this.areaId, this.zIndex);
+        this.settingsModal.modal('toggle')
+
+        setCookie("settings", JSON.stringify(settings), 999);
+    }
+
+    populateSettings() {
+        this.settingsModal.find("#location-size").val(settings.roomSize);
+        this.settingsModal.find("#borders-check").attr("checked", settings.borders);
+    }
+
 }
 
 jQuery(function () {
@@ -1105,4 +1152,12 @@ function dirsShortToLong(dir) {
 
 function dirLongToShort(dir) {
     return dirs[dir] !== undefined ? dirs[dir] : dir;
+}
+
+function setCookie(cname, cvalue, exdays) {
+    localStorage.setItem(cname, cvalue);
+}
+
+function getCookie(cname) {
+    return localStorage.getItem(cname);
 }
