@@ -225,7 +225,7 @@ class MapRenderer {
                 path.strokeColor = mainSelectionColor;
             }
             let neighbourRoom = roomIndex[exit.roomId]
-            if (neighbourRoom && neighbourRoom.exists() && exit.roomId !== room.id) {
+            if (neighbourRoom && neighbourRoom.render && exit.roomId !== room.id) {
                 //neighbourRoom.render.strokeColor = supportSelectionColor;
                 neighbourRoom.exitRenders.forEach(exit => {
                     if (room.id === exit.roomId) {
@@ -252,7 +252,7 @@ class MapRenderer {
                     path.strokeColor = path.orgStrokeColor;
                 }
                 let neighbourRoom = roomIndex[exit.roomId]
-                if (neighbourRoom && neighbourRoom.exists()) {
+                if (neighbourRoom && neighbourRoom.render) {
                     neighbourRoom.render.strokeColor = neighbourRoom.render.orgStrokeColor;
                     neighbourRoom.exitRenders.forEach(exit => {
                         if (room.id === exit.roomId) {
