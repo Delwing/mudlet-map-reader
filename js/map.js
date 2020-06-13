@@ -505,7 +505,6 @@ class MapRenderer {
         this.labelsLayer.activate();
         let myPath = new Path();
 
-
         let sizeOffset = this.baseSize * 0.85;
         let oppositeOffset = this.baseSize - sizeOffset;
         let height = 0.35;
@@ -776,6 +775,10 @@ class Controls {
         this.populateSettings();
 
         let that = this;
+
+        jQuery(".btn").on("click", function () {
+            jQuery(this).blur();
+        });
 
         this.levels.on("click", ".btn-level", function () {
             let zIndex = parseInt(jQuery(this).attr("data-level"));

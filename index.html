@@ -21,17 +21,36 @@
         <img src="images/logo.svg" class="logo" alt="logo">
         Mapa Arkadii
     </h2>
-    <form>
-        <select class="form-control" id="area"></select>
-    </form>
-    <span class="levels-container">
-        <span class="control levels btn-group btn-group-toggle"></span>
-    </span>
-    <button class="control copy-image btn btn-dark">Kopiuj obraz</button>
-    <button class="control save-image btn btn-dark">Zapisz obraz</button>
-    <button class="control search btn btn-dark" data-toggle="modal" data-target="#search">Szukaj</button>
-    <button class="control help btn btn-dark" data-toggle="modal" data-target="#help">Pomoc</button>
-    <button class="control settings btn btn-dark" data-toggle="modal" data-target="#settings"><img src="images/gear-fill.svg" alt="gear"></button>
+    <div class="map-controls">
+        <form>
+            <select class="form-control" id="area"></select>
+        </form>
+        <span class="levels-container">
+            <span class="control levels btn-group btn-group-toggle"></span>
+        </span>
+    </div>
+    <div class="controls flex-wrap btn-toolbar">
+        <button class="control copy-image btn btn-secondary" title="Kopiuj obraz">
+            <img src="images/files.svg" alt="Copy">
+            <span>Kopiuj obraz</span>
+        </button>
+        <button class="control save-image btn btn-secondary" title="Zapisz obraz">
+            <img src="images/download.svg" alt="Download">
+            <span>Zapisz obraz</span>
+        </button>
+        <button class="control search btn btn-secondary" data-toggle="modal" data-target="#search" title="Szukaj">
+            <img src="images/search.svg" alt="search">
+            <span>Szukaj</span>
+        </button>
+        <button class="control settings btn btn-secondary" data-toggle="modal" data-target="#settings" title="Ustawienia">
+            <img src="images/gear-fill.svg" alt="gear">
+            <span>Ustawienia</span>
+        </button>
+        <button class="control help btn btn-secondary" data-toggle="modal" data-target="#help" title="Pomoc">
+            <img src="images/question-circle.svg" alt="question">
+            <span>Pomoc</span>
+        </button>
+    </div>
 </header>
 <div class="progress-container">
     <div class="progress">
@@ -123,10 +142,10 @@
     </div>
 </div>
 <div class="zoom-controls btn-group-vertical">
-    <button class="btn btn-dark btn-sm" data-factor="1.1">
+    <button class="btn btn-secondary btn-sm" data-factor="1.1">
         <img src="images/plus.svg" alt="plus">
     </button>
-    <button class="btn btn-dark btn-sm" data-factor="0.9">
+    <button class="btn btn-secondary btn-sm" data-factor="0.9">
         <img src="images/dash.svg" alt="minus">
     </button>
 </div>
