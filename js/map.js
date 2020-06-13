@@ -552,10 +552,10 @@ class MapRenderer {
 
     renderChar(room) {
         this.charsLayer.activate();
-        let size =  this.baseSize * 0.6
-        let text = new PointText(new Point(room.getXMid(), room.getYMid() + size / 2.5));
+        let size =  this.baseSize * (0.8 / room.roomChar.length)
+        let text = new PointText(new Point(room.getXMid(), room.getYMid() + size / 2.7));
         text.fillColor = 'black';
-        text.fontSize = this.baseSize * 0.8;
+        text.fontSize = size;
         text.content = room.roomChar;
         text.justification = 'center';
         text.locked = true;
