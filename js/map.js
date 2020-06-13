@@ -1,12 +1,14 @@
 let settings = {
-    roomSize: 8,
+    roomSize: 7,
     baseSize: 20,
-    borders: true
+    borders: true,
+    areaName: true,
+    showLabels: true,
 }
 
 let loaded = getCookie("settings");
 if (loaded) {
-    settings = JSON.parse(loaded);
+    settings = {...settings, ...JSON.parse(loaded)}
 }
 
 let envColors = {};
@@ -42,7 +44,7 @@ rooms = [];
 class MapRenderer {
     constructor(controls, canvas, area, scale) {
         this.controls = controls;
-        this.baseSize = settings.baseSize;
+        this.baseSize = parseInt(settings.baseSize)
         this.ladders = ["up", "down"];
         this.canvas = canvas;
         this.area = area;
@@ -60,7 +62,7 @@ class MapRenderer {
     render(highlights) {
         this.hideRoomInfo();
 
-        let textOffset = 80;
+        let textOffset = 50;
 
         let text = new PointText(new Point(0, 0));
         text.fillColor = envColors.default;
@@ -73,6 +75,10 @@ class MapRenderer {
         text.locked = true;
         text.scale(1, -1);
 
+        if(!settings.areaName) {
+            text.content = "";
+        }
+
         this.setDrawingBounds(text, textOffset);
         this.drawBackground(textOffset);
         this.setViewZoom(textOffset);
@@ -81,7 +87,7 @@ class MapRenderer {
         text.setPoint(targetPoint);
 
         this.area.rooms.forEach(value => this.renderRoom(new Room(value, this.baseSize)), this);
-        if (this.area.labels !== undefined) {
+        if (this.area.labels !== undefined && settings.showLabels) {
             this.area.labels.forEach(value => this.renderLabel(value), this);
         }
 
@@ -96,7 +102,7 @@ class MapRenderer {
 
     setDrawingBounds(text, textOffset) {
         let bounds = this.area.getAreaBounds();
-        let additionalPadding = this.baseSize * 4;
+        let additionalPadding = this.baseSize * 2;
 
         this.drawingBounds = {
             minX: this.calculateCoordinates(bounds.minX) - this.baseSize - additionalPadding,
@@ -265,7 +271,6 @@ class MapRenderer {
                 }
             });
         }
-
         this.hideRoomInfo()
     }
 
@@ -429,7 +434,6 @@ class MapRenderer {
             tailLine.strokeWidth = strokeWidth;
         }
 
-
         return path;
     }
 
@@ -548,9 +552,10 @@ class MapRenderer {
 
     renderChar(room) {
         this.charsLayer.activate();
-        let text = new PointText(new Point(room.getXMid(), room.getYMid() + 5));
+        let size =  this.baseSize * 0.6
+        let text = new PointText(new Point(room.getXMid(), room.getYMid() + size / 2.5));
         text.fillColor = 'black';
-        text.fontSize = 15;
+        text.fontSize = this.baseSize * 0.8;
         text.content = room.roomChar;
         text.justification = 'center';
         text.locked = true;
@@ -559,7 +564,7 @@ class MapRenderer {
     }
 
     calculateCoordinates(coord) {
-        return coord * (10 / settings.roomSize) * this.baseSize;
+        return coord * (10 / parseInt(settings.roomSize)) * this.baseSize;
     }
 
     showRoomInfo(room) {
@@ -704,8 +709,8 @@ class MapReader {
             levels.add(parseInt(value.z));
             return value.z === zIndex
         }), area.labels.filter(value => value.Z === zIndex), zIndex, levels);
-        if(!levels.has(zIndex)) {
-           candidateArea = this.getArea(areaId, levels.values().next().value)
+        if (!levels.has(zIndex)) {
+            candidateArea = this.getArea(areaId, levels.values().next().value)
         }
         return candidateArea;
     }
@@ -853,6 +858,10 @@ class Controls {
         });
 
         window.addEventListener("keydown", function keydown(event) {
+            if (jQuery("input").is(":focus")) {
+                return;
+            }
+
             if (event.code === "Equal") {
                 that.zoom(1.1);
                 event.preventDefault();
@@ -860,6 +869,10 @@ class Controls {
         });
 
         window.addEventListener("keydown", function keydown(event) {
+            if (jQuery("input").is(":focus")) {
+                return;
+            }
+
             if (event.code === "Minus") {
                 that.zoom(0.9);
                 event.preventDefault();
@@ -1080,17 +1093,24 @@ class Controls {
     }
 
     handleSaveSettings() {
-        let inputs = this.settingsModal.find(':input');
+        let inputs = this.settingsModal.find('input');
 
         let formData = {};
         inputs.each(function () {
-            formData[this.name] = jQuery(this).val();
-            jQuery(this).val("")
+            let name = jQuery(this).attr("name");
+            let type = jQuery(this).attr("type")
+            if(type === "checkbox") {
+                formData[name] = jQuery(this).is(":checked");
+            } else if(type === "number") {
+                formData[name] = parseInt(jQuery(this).val());
+            } else {
+                formData[name] = jQuery(this).val();
+            }
         });
 
+        settings = {...settings, ...formData};
+
         this.showToast("Zapisano ustawienia")
-        settings.roomSize = parseInt(formData.locationSize);
-        settings.borders = this.settingsModal.find("#borders-check").is(":checked");
         this.draw(this.areaId, this.zIndex);
         this.settingsModal.modal('toggle')
 
@@ -1098,8 +1118,14 @@ class Controls {
     }
 
     populateSettings() {
-        this.settingsModal.find("#location-size").val(settings.roomSize);
-        this.settingsModal.find("#borders-check").attr("checked", settings.borders);
+        for (let setting in settings) {
+            let input = this.settingsModal.find("input[name='" + setting + "']");
+            if (input.attr("type") === "checkbox") {
+                input.attr("checked", settings[setting]);
+            } else {
+                input.val(settings[setting]);
+            }
+        }
     }
 
 }
