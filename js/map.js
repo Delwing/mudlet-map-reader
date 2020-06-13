@@ -699,10 +699,15 @@ class MapReader {
     getArea(areaId, zIndex) {
         let area = this.data[mapDataIndex[areaId]];
         let levels = new Set();
-        return new Area(area.areaName, area.rooms.filter(value => {
+        //TODO: Not optimal...
+        let candidateArea = new Area(area.areaName, area.rooms.filter(value => {
             levels.add(parseInt(value.z));
             return value.z === zIndex
         }), area.labels.filter(value => value.Z === zIndex), zIndex, levels);
+        if(!levels.has(zIndex)) {
+           candidateArea = this.getArea(areaId, levels.values().next().value)
+        }
+        return candidateArea;
     }
 
 
@@ -1005,7 +1010,8 @@ class Controls {
         project.clear();
         this.areaId = areaId;
         this.zIndex = zIndex;
-        let area = this.reader.getArea(this.areaId, this.zIndex);
+        let area = this.reader.getArea(this.areaId, zIndex);
+        this.zIndex = area.getZIndex();
         this.populateLevelButtons(area.getLevels(), this.zIndex);
         this.renderer = new MapRenderer(this, this.canvas, area, 1);
         this.renderer.render(highlights);
