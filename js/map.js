@@ -1111,7 +1111,7 @@ class Controls {
         settings = {...settings, ...formData};
 
         this.showToast("Zapisano ustawienia")
-        this.draw(this.areaId, this.zIndex);
+        this.redraw();
         this.settingsModal.modal('toggle')
 
         setCookie("settings", JSON.stringify(settings), 999);

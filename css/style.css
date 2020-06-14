@@ -20,6 +20,7 @@ h2 {
     margin-right: 10px;
     position: relative;
     font-size: 23px;
+    top: 5px;
 }
 
 h2 img {
@@ -35,6 +36,10 @@ header {
     padding: 20px;
     display: flex;
     justify-content: space-between;
+}
+
+.left-header {
+    display: flex
 }
 
 .map-container {
@@ -94,7 +99,7 @@ canvas {
     margin: 0 10px;
 }
 
-button.control  span {
+button.control span {
     padding-left: 10px;
 }
 
