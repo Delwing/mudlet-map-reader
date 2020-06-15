@@ -139,6 +139,17 @@ button.control span {
     justify-content: center;
 }
 
+
+#help .modal-footer {
+    display: block;
+}
+
+
+h2 a, h2 a:hover {
+    text-decoration: none;
+    color: #ffffff;
+}
+
 @media all and (max-width: 1280px) {
     button.control span {
         display: none;
@@ -150,4 +161,3 @@ button.control span {
         margin: 2px;
     }
 }
-
