@@ -544,10 +544,10 @@ class MapRenderer {
         this.specialLinkLayer.activate();
         let x = (firstPoint.x + secondPoint.x) / 2;
         let y = (firstPoint.y + secondPoint.y) / 2;
-        let door = new Path.Rectangle(x - this.baseSize / 4, y - this.baseSize / 4, this.baseSize / 2, this.baseSize / 2);
+        let door = new Path.Rectangle(x - this.baseSize / 6, y - this.baseSize / 6, this.baseSize / 3, this.baseSize / 3);
         door.scale(0.85, door.center);
-        door.strokeColor = 'rgb(47,168,255)';
-        door.strokeWidth = 2;
+        door.strokeColor = 'rgb(226,205,59)';
+        door.strokeWidth = 1;
     }
 
     renderChar(room) {
