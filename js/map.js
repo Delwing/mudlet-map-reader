@@ -824,7 +824,7 @@ class Controls {
         this.settings.on("submit", function (event) {
             event.preventDefault();
             that.handleSaveSettings();
-        })
+        });
 
         window.addEventListener("keydown", function keydown(event) {
             if (event.code === "F1") {
@@ -1071,15 +1071,19 @@ class Controls {
         });
 
         if (formData.roomId !== undefined) {
-            let room = roomIndex[parseInt(formData.roomId)];
-            if (room !== undefined) {
-                this.draw(room.areaId, room.z);
-                this.zoom(6);
-                this.renderer.focus(room);
-                this.renderer.onRoomClick(roomIndex[parseInt(formData.roomId)]);
-            } else {
-                this.showToast("Nie znaleziono takiej lokacji")
-            }
+          this.findRoom(parseInt(formData.roomId))
+        }
+    }
+
+    findRoom(id) {
+        let room = roomIndex[id];
+        if (room !== undefined) {
+            this.draw(room.areaId, room.z);
+            this.zoom(6);
+            this.renderer.focus(room);
+            this.renderer.onRoomClick(roomIndex[parseInt(id)]);
+        } else {
+            this.showToast("Nie znaleziono takiej lokacji")
         }
     }
 
@@ -1149,8 +1153,14 @@ jQuery(function () {
         highlights = toHighlight.split(",")
     }
     let controls = new Controls(canvas, mapData);
-    controls.draw(area, 0, highlights);
-    jQuery("select").val(area);
+    let roomSearch = params.get('id');
+    if(!roomSearch) {
+        controls.draw(area, 0, highlights);
+    } else {
+        controls.findRoom(parseInt(roomSearch));
+    }
+
+
 
 });
 
