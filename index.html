@@ -172,27 +172,26 @@
         <img src="images/dash.svg" alt="minus">
     </button>
 </div>
-<div class="modal fade" id="roomInfo" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="">
-                <p>Id Lokacji: <span class="room-id"></span></p>
-                <p>Nazwa: <span class="room-name"></span></p>
-                <p>Koordynaty:
-                <ul>
-                    <li>x: <span class="coord-x"></span></li>
-                    <li>y: <span class="coord-y"></span></li>
-                    <li>z: <span class="coord-z"></span></li>
-                </ul>
-                <div class="special">
-                    <p>Specjalne:</p>
-                    <ul></ul>
-                </div>
-            </div>
+<div class="map-container">
+    <div class="info-box">
+        <p>Id Lokacji: <span class="room-id"></span></p>
+        <p>Nazwa: <span class="room-name"></span></p>
+        <p>Koordynaty:
+        <ul>
+            <li>x: <span class="coord-x"></span></li>
+            <li>y: <span class="coord-y"></span></li>
+            <li>z: <span class="coord-z"></span></li>
+        </ul>
+        <div class="exits">
+            <p>Wyjscia:</p>
+            <ul></ul>
+        </div>
+        <div class="special">
+            <p>Specjalne:</p>
+            <ul></ul>
         </div>
     </div>
-</div>
-<canvas id="map" resize="true"></canvas>
+    <canvas id="map" resize="true"></canvas>
 </div>
 </body>
 </html>

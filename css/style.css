@@ -54,17 +54,21 @@ form {
 }
 
 .info-box {
-    /*background: rgba(255, 255, 255, 0.5);*/
-    /*border-radius: 5px;*/
-    /*position: absolute;*/
-    /*top: 15px;*/
-    /*left: 15px;*/
-    /*width: 500px;*/
-    /*color: #2d2d2d;*/
-    /*padding: 10px 20px;*/
-    /*display: none;*/
-    /*font-weight: bold;*/
-    /*backdrop-filter: blur(3px) brightness(60%);*/
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 5px;
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 500px;
+    color: #2d2d2d;
+    padding: 10px 20px;
+    display: none;
+    font-weight: bold;
+    backdrop-filter: blur(3px) brightness(60%);
+}
+
+.info-box a {
+    color: #174762
 }
 
 .info-box li {

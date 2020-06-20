@@ -576,29 +576,37 @@ class MapRenderer {
     }
 
     showRoomInfo(room) {
-        let infoBox = jQuery("#roomInfo");
-        infoBox.modal('show');
+        let infoBox = jQuery(".info-box");
+        infoBox.toggle(true);
         infoBox.find(".room-id").html(room.id);
         infoBox.find(".room-name").html(room.name);
         infoBox.find(".coord-x").html(room.x);
         infoBox.find(".coord-y").html(room.y);
         infoBox.find(".coord-z").html(room.z);
 
-        let special = infoBox.find(".special");
-        let specialList = special.find("ul")
-        specialList.html("");
+        this.infoExitsGroup(infoBox.find(".exits"), room.exits);
+        this.infoExitsGroup(infoBox.find(".special"), room.specialExits);
+    }
+
+    infoExitsGroup(container, exits) {
+        let containerList = container.find("ul");
+        containerList.html("");
         let show = false;
-        for (let exit in room.specialExits) {
-            let areaLink = "";
+        for (let exit in exits) {
             show = true;
-            if (roomIndex[room.specialExits[exit]].areaId !== this.area.areaId) {
-                let destRoom = roomIndex[room.specialExits[exit]];
-                let area = this.controls.reader.data[mapDataIndex[destRoom.areaId]];
-                areaLink = ' <a href="?area=' + destRoom.areaId + '">' + area.areaName + '</a>'
-            }
-            specialList.append("<li>" + exit + " : " + room.specialExits[exit] + areaLink + "</li>")
+            containerList.append(this.infoExit(exit, exits[exit]));
         }
-        special.toggle(show)
+        container.toggle(show);
+    }
+
+    infoExit(exit, id) {
+        let areaLink = "";
+        if (roomIndex[id].areaId !== this.area.areaId) {
+            let destRoom = roomIndex[id];
+            let area = this.controls.reader.data[mapDataIndex[destRoom.areaId]];
+            areaLink = ' ->  ' + '<a href="#" data-room="' + destRoom.id + '">' + area.areaName + '</a>'
+        }
+        return "<li>" + exit + " : " + '<a href="#" data-room="' + id + '">'  + id + '</a>' + areaLink + "</li>";
     }
 
     hideRoomInfo() {
@@ -719,7 +727,7 @@ class MapReader {
         let area = this.data[mapDataIndex[areaId]];
         let levels = new Set();
         //TODO: Not optimal...
-        let candidateArea = new Area(area.areaName, area.rooms.filter(value => {
+        let candidateArea = new Area(areaId, area.areaName, area.rooms.filter(value => {
             levels.add(parseInt(value.z));
             return value.z === zIndex
         }), area.labels.filter(value => value.Z === zIndex), zIndex, levels);
@@ -733,7 +741,8 @@ class MapReader {
 }
 
 class Area {
-    constructor(areaName, rooms, labels, zIndex, levels) {
+    constructor(areaId, areaName, rooms, labels, zIndex, levels) {
+        this.areaId = parseInt(areaId);
         this.areaName = areaName;
         this.rooms = [];
         this.labels = labels;
@@ -919,6 +928,11 @@ class Controls {
         jQuery(window).on("resize", function () {
             that.redraw()
         });
+
+        jQuery("body").on("click", "[data-room]", function (e) {
+            that.findRoom(parseInt(jQuery(this).attr("data-room")));
+            e.preventDefault();
+        });
     }
 
     activateMouseEvents() {
@@ -1074,7 +1088,7 @@ class Controls {
         this.searchModal.modal('show');
     }
 
-    submitSearch(event) {
+    submitSearch() {
         this.searchModal.modal('toggle');
         let inputs = this.search.find(':input');
 
