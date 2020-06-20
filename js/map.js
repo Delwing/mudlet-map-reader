@@ -4,7 +4,7 @@ let settings = {
     borders: true,
     areaName: true,
     showLabels: true,
-}
+};
 
 let loaded = getCookie("settings");
 if (loaded) {
@@ -57,6 +57,9 @@ class MapRenderer {
         this.charsLayer = new Layer();
         this.roomSelected = undefined;
         this.isDrag = false;
+
+        this.rasterLayer = new Layer();
+        this.rasterLayer.name = "Raster"
     }
 
     render(highlights) {
@@ -75,7 +78,7 @@ class MapRenderer {
         text.locked = true;
         text.scale(1, -1);
 
-        if(!settings.areaName) {
+        if (!settings.areaName) {
             text.content = "";
         }
 
@@ -244,6 +247,10 @@ class MapRenderer {
             }
         });
 
+        // room.circle = new Path.Circle(room.render.position, this.baseSize / 2)
+        // room.circle.fillColor = 'green';
+        // room.circle.strokeColor = 'white';
+
         this.showRoomInfo(room)
     }
 
@@ -270,6 +277,7 @@ class MapRenderer {
                     });
                 }
             });
+            //room.circle.remove()
         }
         this.hideRoomInfo()
     }
@@ -552,7 +560,7 @@ class MapRenderer {
 
     renderChar(room) {
         this.charsLayer.activate();
-        let size =  this.baseSize * (0.8 / room.roomChar.length)
+        let size = this.baseSize * (0.8 / room.roomChar.length)
         let text = new PointText(new Point(room.getXMid(), room.getYMid() + size / 2.7));
         text.fillColor = 'black';
         text.fontSize = size;
@@ -568,8 +576,8 @@ class MapRenderer {
     }
 
     showRoomInfo(room) {
-        let infoBox = jQuery(".info-box");
-        infoBox.toggle(true);
+        let infoBox = jQuery("#roomInfo");
+        infoBox.modal('show');
         infoBox.find(".room-id").html(room.id);
         infoBox.find(".room-name").html(room.name);
         infoBox.find(".coord-x").html(room.x);
@@ -581,8 +589,14 @@ class MapRenderer {
         specialList.html("");
         let show = false;
         for (let exit in room.specialExits) {
+            let areaLink = "";
             show = true;
-            specialList.append("<li>" + exit + " : " + room.specialExits[exit] + "</li>")
+            if (roomIndex[room.specialExits[exit]].areaId !== this.area.areaId) {
+                let destRoom = roomIndex[room.specialExits[exit]];
+                let area = this.controls.reader.data[mapDataIndex[destRoom.areaId]];
+                areaLink = ' <a href="?area=' + destRoom.areaId + '">' + area.areaName + '</a>'
+            }
+            specialList.append("<li>" + exit + " : " + room.specialExits[exit] + areaLink + "</li>")
         }
         special.toggle(show)
     }
@@ -1071,7 +1085,7 @@ class Controls {
         });
 
         if (formData.roomId !== undefined) {
-          this.findRoom(parseInt(formData.roomId))
+            this.findRoom(parseInt(formData.roomId))
         }
     }
 
@@ -1103,9 +1117,9 @@ class Controls {
         inputs.each(function () {
             let name = jQuery(this).attr("name");
             let type = jQuery(this).attr("type")
-            if(type === "checkbox") {
+            if (type === "checkbox") {
                 formData[name] = jQuery(this).is(":checked");
-            } else if(type === "number") {
+            } else if (type === "number") {
                 formData[name] = parseInt(jQuery(this).val());
             } else {
                 formData[name] = jQuery(this).val();
@@ -1153,13 +1167,14 @@ jQuery(function () {
         highlights = toHighlight.split(",")
     }
     let controls = new Controls(canvas, mapData);
+    globalControls = controls;
+    globalControls.lightMode = true
     let roomSearch = params.get('id');
-    if(!roomSearch) {
+    if (!roomSearch) {
         controls.draw(area, 0, highlights);
     } else {
         controls.findRoom(parseInt(roomSearch));
     }
-
 
 
 });

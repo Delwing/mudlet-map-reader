@@ -18,18 +18,18 @@
 <body>
 <header>
     <div class="left-header">
-    <h2>
-        <img src="images/logo.svg" class="logo" alt="logo">
-        <a href="index.html">Mapa Arkadii</a>
-    </h2>
-    <div class="map-controls">
-        <form>
-            <select class="form-control" id="area"></select>
-        </form>
-        <span class="levels-container">
+        <h2>
+            <img src="images/logo.svg" class="logo" alt="logo">
+            <a href="index.html">Mapa Arkadii</a>
+        </h2>
+        <div class="map-controls">
+            <form>
+                <select class="form-control" id="area"></select>
+            </form>
+            <span class="levels-container">
             <span class="control levels btn-group btn-group-toggle"></span>
         </span>
-    </div>
+        </div>
     </div>
     <div class="controls flex-wrap btn-toolbar">
         <button class="control copy-image btn btn-secondary" title="Kopiuj obraz">
@@ -172,22 +172,27 @@
         <img src="images/dash.svg" alt="minus">
     </button>
 </div>
-<div class="map-container">
-    <div class="info-box">
-        <p>Id Lokacji: <span class="room-id"></span></p>
-        <p>Nazwa: <span class="room-name"></span></p>
-        <p>Koordynaty:
-        <ul>
-            <li>x: <span class="coord-x"></span></li>
-            <li>y: <span class="coord-y"></span></li>
-            <li>z: <span class="coord-z"></span></li>
-        </ul>
-        <div class="special">
-            <p>Specjalne:</p>
-            <ul></ul>
+<div class="modal fade" id="roomInfo" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="">
+                <p>Id Lokacji: <span class="room-id"></span></p>
+                <p>Nazwa: <span class="room-name"></span></p>
+                <p>Koordynaty:
+                <ul>
+                    <li>x: <span class="coord-x"></span></li>
+                    <li>y: <span class="coord-y"></span></li>
+                    <li>z: <span class="coord-z"></span></li>
+                </ul>
+                <div class="special">
+                    <p>Specjalne:</p>
+                    <ul></ul>
+                </div>
+            </div>
         </div>
     </div>
-    <canvas id="map" resize="true"></canvas>
+</div>
+<canvas id="map" resize="true"></canvas>
 </div>
 </body>
 </html>
