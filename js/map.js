@@ -606,7 +606,14 @@ class MapRenderer {
             let area = this.controls.reader.data[mapDataIndex[destRoom.areaId]];
             areaLink = ' ->  ' + '<a href="#" data-room="' + destRoom.id + '">' + area.areaName + '</a>'
         }
-        return "<li>" + exit + " : " + '<a href="#" data-room="' + id + '">'  + id + '</a>' + areaLink + "</li>";
+        return "<li>" + this.translateDir(exit) + " : " + '<a href="#" data-room="' + id + '">' + id + '</a>' + areaLink + "</li>";
+    }
+
+    translateDir(dir) {
+        if (plDirs.hasOwnProperty(dir)) {
+            return plDirs[dir];
+        }
+        return dir
     }
 
     hideRoomInfo() {
@@ -1227,6 +1234,19 @@ let dirNumbers = {
     9: "u",
     10: "d",
 };
+
+let plDirs = {
+    "north": "polnoc",
+    "south": "poludnie",
+    "east": "wschod",
+    "west": "zachod",
+    "northeast": "polnocny-wschod",
+    "northwest": "polnocny-zachod",
+    "southeast": "poludniowy-wschod",
+    "southwest": "poludniowy-zachod",
+    "up": "gora",
+    "down": "dol",
+}
 
 function dirsShortToLong(dir) {
     let result = getKeyByValue(dirs, dir);
