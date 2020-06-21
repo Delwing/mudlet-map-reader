@@ -59,7 +59,7 @@ class MapRenderer {
         this.isDrag = false;
 
         this.rasterLayer = new Layer();
-        this.rasterLayer.name = "Raster"
+        this.rasterLayer.name = "Raster";
     }
 
     render(highlights) {
