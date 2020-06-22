@@ -59,7 +59,7 @@ class MapRenderer {
         this.isDrag = false;
 
         this.rasterLayer = new Layer();
-        this.rasterLayer.name = "Raster"
+        this.rasterLayer.name = "Raster";
     }
 
     render(highlights) {
@@ -580,12 +580,26 @@ class MapRenderer {
         infoBox.toggle(true);
         infoBox.find(".room-id").html(room.id);
         infoBox.find(".room-name").html(room.name);
+        infoBox.find(".room-env").html(room.env);
         infoBox.find(".coord-x").html(room.x);
         infoBox.find(".coord-y").html(room.y);
         infoBox.find(".coord-z").html(room.z);
 
         this.infoExitsGroup(infoBox.find(".exits"), room.exits);
         this.infoExitsGroup(infoBox.find(".special"), room.specialExits);
+
+        this.userDataGroup(infoBox.find(".userData"), room.userData);
+    }
+
+    userDataGroup(container, userData) {
+        let containerList = container.find("ul");
+        containerList.html("");
+        let show = false;
+        for (let userDataKey in userData) {
+            show = true;
+            containerList.append("<li>" + userDataKey + ":<br>&nbsp; &nbsp; &nbsp;" + userData[userDataKey] + "</li>");
+        }
+        container.toggle(show);
     }
 
     infoExitsGroup(container, exits) {

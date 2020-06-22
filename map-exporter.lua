@@ -29,6 +29,11 @@ function MapExporter:export()
         }
         for k, v in pairs(rooms) do
             local x,y,z = getRoomCoordinates(v)
+            local userDataKeys = getRoomUserDataKeys(v)
+            local userData = {}
+            for _,key in ipairs(userDataKeys) do
+                userData[key] = getRoomUserData(v,key)
+            end
             local roomInfo = {
                 id = v,
                 x = x,
@@ -41,7 +46,8 @@ function MapExporter:export()
                 doors = getDoors(v),
                 customLines = self:fixCustomLines(getCustomLines(v)),
                 specialExits = getSpecialExitsSwap(v),
-                stubs = getExitStubs1(v)
+                stubs = getExitStubs1(v),
+                userData = table.size(userData) > 0 and userData or nil
             }
             table.insert(areaRooms.rooms, roomInfo)
         end
@@ -59,14 +65,29 @@ function MapExporter:export()
     file:close()
 
     local colors = {}
-    for k,v in pairs(getCustomEnvColorTable()) do
-        local singleColor = {
-            envId = k,
-            colors = v
-        }
-        table.insert(colors, singleColor)
+    local adjustedColors = {}
+    for i=0,255 do
+        if i ~= 16 then -- ansi 016 is ignored.
+            local key = string.format("ansi_%03d",i)
+            local envID
+            if i == 0 or i == 8 then -- ansi 000 is set to envID 8, and ansi 008 is set to envID 16, due to envID starting at 1 and ansi colors at 0
+                envID = i + 8
+            else
+                envID = i
+            end
+            colors[envID] = color_table[key]
+        end
     end
-
+    for k,v in pairs(getCustomEnvColorTable()) do
+        colors[k] = v
+    end
+    for envID,color in pairs(colors) do
+      table.insert(adjustedColors, {
+        envId = envID,
+        colors = color
+      })
+    end
+    colors = adjustedColors
 
     local colorsFileName = self.dir .. "data/colors.js"
     colorsFile = io.open (colorsFileName, "w+")
@@ -86,7 +107,9 @@ function MapExporter:export()
         currentPosition:close()
     end
 
-    openUrl("file:///" .. self.dir .. "index.html")
+    local fileLocation = self.dir .. "index.html"
+    local fileURL = "file:///" .. fileLocation
+    openUrl(fileURL)
 end
 
 function MapExporter:fixCustomLines(lineObj)
