@@ -1001,6 +1001,11 @@ class Controls {
         this.adjustZoomBar()
     }
 
+    setZoom(zoom) {
+        view.zoom = zoom;
+        this.adjustZoomBar()
+    }
+
     adjustZoomBar() {
         let percentage = (view.zoom - view.minZoom) / (10 - view.minZoom);
 
@@ -1127,7 +1132,7 @@ class Controls {
         let room = roomIndex[id];
         if (room !== undefined) {
             this.draw(room.areaId, room.z, room);
-            this.zoom(6);
+            this.setZoom(2);
             this.renderer.focus(roomIndex[parseInt(id)]);
             this.renderer.onRoomClick(roomIndex[parseInt(id)]);
         } else {
