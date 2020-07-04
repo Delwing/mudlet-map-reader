@@ -1132,7 +1132,7 @@ class Controls {
         let room = roomIndex[id];
         if (room !== undefined) {
             this.draw(room.areaId, room.z, room);
-            this.setZoom(2);
+            this.setZoom(1);
             this.renderer.focus(roomIndex[parseInt(id)]);
             this.renderer.onRoomClick(roomIndex[parseInt(id)]);
         } else {
