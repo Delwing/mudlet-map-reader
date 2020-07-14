@@ -514,12 +514,7 @@ class MapRenderer {
         myPath.add(new Point(oppositeOffset + room.getX(), room.getY() + sizeOffset));
         myPath.add(new Point(room.getX() + sizeOffset, room.getY() + sizeOffset));
 
-        let baseColor;
-        if (room.render.fillColor.lightness > 0.4) {
-            baseColor = 0.20;
-        } else {
-            baseColor = 0.80;
-        }
+        let baseColor = this.lightnessDependantColor(room);
 
         myPath.fillColor = new Color(baseColor, baseColor, baseColor, 0.75);
         myPath.strokeColor = new Color(baseColor, baseColor, baseColor);
@@ -537,6 +532,14 @@ class MapRenderer {
         return myPath;
     }
 
+    lightnessDependantColor(room) {
+        if (room.render.fillColor.lightness > 0.4) {
+            return 0.20;
+        } else {
+            return 0.80;
+        }
+    }
+
     renderDoors(firstPoint, secondPoint) {
         this.specialLinkLayer.activate();
         let x = (firstPoint.x + secondPoint.x) / 2;
@@ -549,9 +552,9 @@ class MapRenderer {
 
     renderChar(room) {
         this.charsLayer.activate();
-        let size = this.baseSize * (0.8 / room.roomChar.length)
+        let size = this.baseSize * (0.8 / room.roomChar.length);
         let text = new PointText(new Point(room.getXMid(), room.getYMid() + size / 2.7));
-        text.fillColor = 'black';
+        text.fillColor = this.lightnessDependantColor(room);
         text.fontSize = size;
         text.content = room.roomChar;
         text.justification = 'center';
