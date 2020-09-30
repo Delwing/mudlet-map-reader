@@ -3,7 +3,30 @@ MapExporter = MapExporter or {
     dir = getMudletHomeDir() .. "/plugins/mudlet-map-reader/"
 }
 
+MapExporter.fileLocation = MapExporter.dir .. "index.html"
+MapExporter.fileURL = "file:///" .. MapExporter.fileLocation
+
+function MapExporter:echoUrl()
+    cecho("<blue>(<white>Map Explorer<blue>) ")
+    echoLink(self.fileLocation, string.format([[openUrl("%s")]], fileURL), "Otworz", false)
+    echo(" \n")
+end
+
+function MapExporter:openUrl()
+    openUrl(self.fileURL)
+end
+
 function MapExporter:export()
+    self:exportRooms()
+    self:exportColors()
+    if getPlayerRoom() then
+       self:exportPosition()
+    end
+
+    self:openUrl()
+end
+
+function MapExporter:exportRooms()
     local areas = {}
     for areaName, areaId in pairs(getAreaTable()) do
 
@@ -63,7 +86,9 @@ function MapExporter:export()
     file:write("mapData = ")
     file:write(yajl.to_string(areas))
     file:close()
+end
 
+function MapExporter:exportColors()
     local colors = {}
     local adjustedColors = {}
     for i=0,255 do
@@ -82,10 +107,10 @@ function MapExporter:export()
         colors[k] = v
     end
     for envID,color in pairs(colors) do
-      table.insert(adjustedColors, {
-        envId = envID,
-        colors = color
-      })
+        table.insert(adjustedColors, {
+            envId = envID,
+            colors = color
+        })
     end
     colors = adjustedColors
 
@@ -94,28 +119,23 @@ function MapExporter:export()
     colorsFile:write("colors = ")
     colorsFile:write(yajl.to_string(colors))
     colorsFile:close()
+end
 
-    if getPlayerRoom() then
-        local position = {
-            area = getRoomArea(getPlayerRoom()),
-            room = getPlayerRoom()
-        }
-        local currentPosition = self.dir .. "/data/current.js"
-        currentPosition = io.open (currentPosition, "w+")
-        currentPosition:write("position = ")
-        currentPosition:write(yajl.to_string(position))
-        currentPosition:close()
-    end
-
-    local fileLocation = self.dir .. "index.html"
-    local fileURL = "file:///" .. fileLocation
-    openUrl(fileURL)
+function MapExporter:exportPosition()
+    local position = {
+        area = getRoomArea(getPlayerRoom()),
+        room = getPlayerRoom()
+    }
+    local currentPosition = self.dir .. "/data/current.js"
+    currentPosition = io.open (currentPosition, "w+")
+    currentPosition:write("position = ")
+    currentPosition:write(yajl.to_string(position))
+    currentPosition:close()
 end
 
 function MapExporter:fixCustomLines(lineObj)
     for k,v in pairs(lineObj) do
         local tempPoints = {}
-        local index = 1
         for i,j in pairs(v.points) do
             table.insert(tempPoints, math.max(1, tonumber(i)), j)
         end

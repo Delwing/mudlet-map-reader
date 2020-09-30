@@ -5,11 +5,32 @@
 	<TimerPackage />
 	<AliasPackage>
 		<Alias isActive="yes" isFolder="no">
-			<name>exportArea</name>
+			<name>exportMap (legacy)</name>
 			<script>MapExporter:export()</script>
 			<command></command>
 			<packageName></packageName>
 			<regex>^/export_map$</regex>
+		</Alias>
+		<Alias isActive="yes" isFolder="no">
+			<name>exportMap</name>
+			<script>MapExporter:export()</script>
+			<command></command>
+			<packageName></packageName>
+			<regex>^/map_export$</regex>
+		</Alias>
+		<Alias isActive="yes" isFolder="no">
+			<name>openMap</name>
+			<script>MapExporter:openUrl()</script>
+			<command></command>
+			<packageName></packageName>
+			<regex>^/map_open$</regex>
+		</Alias>
+		<Alias isActive="yes" isFolder="no">
+			<name>exportArea</name>
+			<script>MapExporter:echoUrl()</script>
+			<command></command>
+			<packageName></packageName>
+			<regex>^/map_link$</regex>
 		</Alias>
 	</AliasPackage>
 	<ActionPackage />

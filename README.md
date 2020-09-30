@@ -17,6 +17,18 @@ Work in progress...
 
 Wystarczy wywołać komendę
 ```
-/export_map
+/map_export
 ```
 Komenda wyeksportują naszą mapę i otworzy przeglądarkę.
+
+Po wykonanym eksporcie można jeszcze wywołać komendy:
+
+Otwiera mapę w przeglądarce
+```
+/map_open
+```
+
+Wyświetla link do pliku otwieranego w przeglądarce
+```
+/map_link
+```
