@@ -127,26 +127,40 @@ class MapRenderer {
         this.roomLayer.activate();
         let strokeWidth = 1;
         let size = this.baseSize;
-        let rectangle = new Path.Rectangle(room.getX(), room.getY(), size, size);
+        let roomShape;
+        if(!this.controls.getSettings().round) {
+            roomShape = new Path.Rectangle(room.getX(), room.getY(), size, size);
+        } else {
+            roomShape = new Path.Circle(room.getX() + size / 2, room.getY() + size / 2, size / 2);
+        }
         let color = envColors[room.env];
         if (color === undefined) {
             color = [114, 1, 0];
         }
-        rectangle.fillColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255);
-        let strokeColor;
-        if (rectangle.fillColor.lightness > 0.1) {
+
+        let strokeColor, frameColor;
+        if(this.controls.getSettings().frameMode) {
+            frameColor = [...color];
+            color = [0, 0, 0];
+        }
+        roomShape.fillColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255);
+        if (roomShape.fillColor.lightness > 0.1) {
             strokeColor = new Color(color[0] / 255, color[1] / 255, color[2] / 255)
         } else {
             strokeColor = new Color(0.3, 0.3, 0.3)
         }
-        rectangle.strokeColor = strokeColor;
-        rectangle.strokeWidth = strokeWidth;
+        roomShape.strokeColor = strokeColor;
+        roomShape.strokeWidth = strokeWidth;
 
         if (this.controls.getSettings().borders) {
-            rectangle.strokeColor = new Color(0.8, 0.8, 0.8);
+            roomShape.strokeColor = new Color(0.8, 0.8, 0.8);
         }
 
-        room.render = rectangle;
+        if(this.controls.getSettings().frameMode) {
+            roomShape.strokeColor = frameColor
+        }
+
+        room.render = roomShape;
         room.render.orgStrokeColor = room.render.strokeColor;
         room.render.orgFillColor = room.render.fillColor;
         this.pointerReactor(room.render);
@@ -268,17 +282,18 @@ class MapRenderer {
     }
 
     renderLink(room1, dir1, room2, exit) {
+        let round = this.controls.getSettings().round;
         this.linkLayer.activate();
         if (room1 !== undefined && !room1.specialExits.hasOwnProperty(dir1)) {
             let path;
 
-            let exitPoint = new Point(room1.getExitX(dir1), room1.getExitY(dir1));
+            let exitPoint = new Point(room1.getExitX(dir1, round), room1.getExitY(dir1, round));
             let secondPoint;
 
             if (room2.exists()) {
                 let connectedDir = getKeyByValue(room2.exits, room1.id);
                 let isOneWay = connectedDir === undefined;
-                secondPoint = new Point(room2.getExitX(connectedDir), room2.getExitY(connectedDir));
+                secondPoint = new Point(room2.getExitX(connectedDir, round), room2.getExitY(connectedDir, round));
                 if (!isOneWay) {
                     path = new Path();
                     path.moveTo(exitPoint);
@@ -660,7 +675,10 @@ class Room {
         return this.getY() + this.baseSize / 2;
     }
 
-    getExitX(dir) {
+    getExitX(dir, round) {
+        if(round) {
+            return this.getXMid()
+        }
         switch (dir) {
             case "west":
             case "w":
@@ -681,7 +699,10 @@ class Room {
         }
     }
 
-    getExitY(dir) {
+    getExitY(dir, round) {
+        if(round) {
+            return this.getYMid()
+        }
         switch (dir) {
             case "north":
             case "n":
@@ -1230,9 +1251,12 @@ jQuery.fn.mudletMap = function (settings) {
         roomSize: 7,
         baseSize: 20,
         borders: true,
+        frameMode: false,
+        round: false,
         areaName: true,
         showLabels: true,
         radiusLimit: 0,
+        monochromatic: false,
         dotSelectionMarker: false,
         disableDrag: false,
         disableRedrawOnResize: false,
