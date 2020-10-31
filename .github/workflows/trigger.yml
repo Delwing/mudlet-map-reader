@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Repository Dispatch
-            uses: peter-evans/repository-dispatch@v1
-            with:
-              repository: Delwing/mudlet-map-browser
-              token: ${{ secrets.BROWSER_ACCESS_TOKEN }}
-              event-type: release
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        repository: Delwing/mudlet-map-browser
+        token: ${{ secrets.BROWSER_ACCESS_TOKEN }}
+        event-type: release
