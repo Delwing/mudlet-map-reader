@@ -839,7 +839,8 @@ class Controls {
             jQuery(this).blur();
         });
 
-        this.levels.on("click", ".btn-level", function () {
+        this.levels.on("click", ".btn-level", function (event) {
+            event.preventDefault();
             let zIndex = parseInt(jQuery(this).attr("data-level"));
             that.draw(that.areaId, zIndex);
         });
@@ -1078,14 +1079,27 @@ class Controls {
         let levelsSorted = Array.from(levelsSet).sort(function (a, b) {
             return a - b;
         });
-        for (let level of levelsSorted) {
-            let classes = "btn btn-level";
-            if (level === zIndex) {
-                classes += " btn-primary";
-            } else {
-                classes += " btn-secondary";
+
+        if(levelsSorted.length > 10) {
+            let container = jQuery('<div class="dropdown"></div>');
+            let button = jQuery('<button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown">'+zIndex+'</button>');
+            let menu = jQuery('<div class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>');
+            container.append(button);
+            container.append(menu);
+            for (let level of levelsSorted) {
+                menu.append('<a class="dropdown-item btn-level" href="#" data-level="' + level + '">' + level + '</a>')
             }
-            this.levels.append("<button type=\"button\" class=\"" + classes + "\" data-level=\"" + level + "\">" + level + "</button>");
+            this.levels.append(container)
+        } else {
+            for (let level of levelsSorted) {
+                let classes = "btn btn-level";
+                if (level === zIndex) {
+                    classes += " btn-primary";
+                } else {
+                    classes += " btn-secondary";
+                }
+                this.levels.append("<button type=\"button\" class=\"" + classes + "\" data-level=\"" + level + "\">" + level + "</button>");
+            }
         }
     }
 

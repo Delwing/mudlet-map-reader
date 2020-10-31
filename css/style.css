@@ -163,13 +163,15 @@ h2 a, h2 a:hover {
     height: 100%;
 }
 
-.dropdown-toggle::after {
+.lang-dropdown .dropdown-toggle::after {
     display: none;
 }
 
 .dropdown-menu {
     min-width: auto;
 }
+
+
 
 @media all and (max-width: 1280px) {
     button.control span {
