@@ -1,1 +1,0 @@
-mpackage = "mudlet-map-reader"
