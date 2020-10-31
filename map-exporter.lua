@@ -3,17 +3,14 @@ MapExporter = MapExporter or {
     dir = getMudletHomeDir() .. "/plugins/mudlet-map-reader/"
 }
 
-MapExporter.fileLocation = MapExporter.dir .. "index.html"
-MapExporter.fileURL = "file:///" .. MapExporter.fileLocation
-
 function MapExporter:echoUrl()
     cecho("<blue>(<white>Map Explorer<blue>) ")
-    echoLink(self.fileLocation, string.format([[openUrl("%s")]], fileURL), "Otworz", false)
+    echoLink(self.fileLocation, string.format([[openUrl("%s")]], MapExporter:getFileLocation()), "Otworz", false)
     echo(" \n")
 end
 
 function MapExporter:openUrl()
-    openUrl(self.fileURL)
+    openUrl("file:///" .. self:getFileLocation())
 end
 
 function MapExporter:export()
@@ -24,6 +21,10 @@ function MapExporter:export()
     end
 
     self:openUrl()
+end
+
+function MapExporter:getFileLocation()
+    return self.dir .. "index.html"
 end
 
 function MapExporter:exportRooms()

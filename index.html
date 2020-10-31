@@ -10,18 +10,23 @@
     <script src="js/paper-full.min.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/jquery-mousewheel.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery-localization.min.js"></script>
+    <script src="js/translations.js"></script>
+    <script src="js/popper.js"></script>
     <script src="js/map.js"></script>
     <script src="js/script.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="css/translations.css" rel="stylesheet" type="text/css">
     <link href="css/style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
+    <div class="widget localizationTool"></div>
 <header>
     <div class="left-header">
         <h2>
             <img src="images/logo.svg" class="logo" alt="logo">
-            <a href="index.html">Mapa Arkadii</a>
+            <a href="index.html"><span id="title">Mapa Arkadii</span></a>
         </h2>
         <div class="map-controls">
             <form>
@@ -35,7 +40,7 @@
     <div class="controls flex-wrap btn-toolbar">
         <button class="control copy-image btn btn-secondary" title="Kopiuj obraz">
             <img src="images/files.svg" alt="Copy">
-            <span>Kopiuj obraz</span>
+            <span id="trn-copy">Kopiuj obraz</span>
         </button>
         <button class="control save-image btn btn-secondary" title="Zapisz obraz">
             <img src="images/download.svg" alt="Download">
@@ -53,6 +58,12 @@
             <img src="images/question-circle.svg" alt="question">
             <span>Pomoc</span>
         </button>
+        <div class="dropdown lang-dropdown">
+            <button class="btn btn-secondary dropdown-toggle lang-label" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <div class="current-language-flag flag"></div>
+            </button>
+            <div class="dropdown-menu lang-selector" aria-labelledby="dropdownMenuButton"></div>
+          </div>
     </div>
 </header>
 <div class="progress-container">
@@ -118,7 +129,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="round" value="1" id="round-check">
                             <label class="form-check-label" for="round-check">
-                                Okragłę lokacje
+                                Okrągłe lokacje
                             </label>
                         </div>
                         <div class="form-check">
@@ -154,21 +165,21 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p><kbd>F1</kbd> - ta pomoc</p>
-                <p><kbd>Ctrl + S</kbd> - zapisanie obrazka</p>
-                <p><kbd>Ctrl + C</kbd> - kopiowanie obrazka do schowka</p>
-                <p><kbd>Ctrl + F</kbd> - wyszukiwaie</p>
+                <p><kbd>F1</kbd> - <span>ta pomoc</span></p>
+                <p><kbd>Ctrl + S</kbd> - <span>zapisz obraz</span></p>
+                <p><kbd>Ctrl + C</kbd> - <span>kopiowanie obrazka do schowka</span></p>
+                <p><kbd>Ctrl + F</kbd> - <span>wyszukiwaie</span></p>
                 <p></p>
-                <p><kbd>+</kbd> - przybliżenie</p>
-                <p><kbd>-</kbd> - oddalenie</p>
-                <p><kbd>↑ ↓ → ←</kbd> - przesuwanie mapy</p>
+                <p><kbd>+</kbd> - <span>przybliżenie</span></p>
+                <p><kbd>-</kbd> - <span>oddalenie</span></p>
+                <p><kbd>↑ ↓ → ←</kbd> - <span>przesuwanie mapy</span></p>
                 <p>Dodatkowo z zaznaczonej lokacji można po zwykłych wyjściach się poruszać za pomocą klawiatury numerycznej</p>
             </div>
             <div class="modal-footer">
                 <div>
-                    Autor: Dargoth
+                    <span>Autor</span></spanAutor>: Dargoth
                     <br>
-                    GitHub projektu: <a target="_blank" href="https://github.com/Delwing/mudlet-map-reader">https://github.com/Delwing/mudlet-map-reader</a></div>
+                    GitHub: <a target="_blank" href="https://github.com/Delwing/mudlet-map-reader">https://github.com/Delwing/mudlet-map-reader</a></div>
             </div>
         </div>
     </div>
@@ -188,25 +199,25 @@
 </div>
 <div class="map-container">
     <div class="info-box">
-        <p>Id Lokacji: <span class="room-id"></span></p>
-        <p>Nazwa: <span class="room-name"></span></p>
+        <p><span>ID Lokacji</span>: <span class="room-id"></span></p>
+        <p><span>Nazwa</span>: <span class="room-name"></span></p>
         <p>Env Id: <span class="room-env"></span></p>
-        <p>Koordynaty:
+        <p><span>Koordynaty</span>:
         <ul>
             <li>x: <span class="coord-x"></span></li>
             <li>y: <span class="coord-y"></span></li>
             <li>z: <span class="coord-z"></span></li>
         </ul>
         <div class="exits">
-            <p>Wyjscia:</p>
+            <p><span>Wyjścia</span>:</p>
             <ul></ul>
         </div>
         <div class="special">
-            <p>Specjalne:</p>
+            <p><span>Specjalne</span>:</p>
             <ul></ul>
         </div>
         <div class="userData">
-            <p>Inne:</p>
+            <p><span>Inne</span>:</p>
             <ul></ul>
         </div>
     </div>

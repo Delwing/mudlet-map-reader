@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MudletPackage>
+<MudletPackage version="1.001">
+	<ScriptPackage>
+		<Script isActive="yes" isFolder="no">
+			<name>standalone-init</name>
+			<packageName></packageName>
+			<script>local path = package.path
+local homeDirectory = getMudletHomeDir():gsub("\\", "/") .. "/"
+
+local luaDirectory = string.format("%s/%s", homeDirectory, [[?.lua]])
+package.path = string.format("%s;%s", luaDirectory, path)
+
+package.loaded.init = nil
+require("mudlet-map-reader.map-exporter")
+
+MapExporter.dir = getMudletHomeDir() .. "/mudlet-map-reader/"
+		</script>
+			<eventHandlerList />
+		</Script>
+	</ScriptPackage>
+</MudletPackage>

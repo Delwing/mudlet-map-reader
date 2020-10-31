@@ -12,6 +12,7 @@ html, body {
 body {
     padding: 10px;
     background: #000;
+    overflow: hidden;
 }
 
 h2 {
@@ -152,6 +153,22 @@ button.control span {
 h2 a, h2 a:hover {
     text-decoration: none;
     color: #ffffff;
+}
+
+.widget {
+    display: none;
+}
+
+.lang-label {
+    height: 100%;
+}
+
+.dropdown-toggle::after {
+    display: none;
+}
+
+.dropdown-menu {
+    min-width: auto;
 }
 
 @media all and (max-width: 1280px) {

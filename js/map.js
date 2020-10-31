@@ -617,7 +617,7 @@ class MapRenderer {
 
     translateDir(dir) {
         if (plDirs.hasOwnProperty(dir)) {
-            return plDirs[dir];
+            return translateString(plDirs[dir]);
         }
         return dir
     }
@@ -1072,6 +1072,9 @@ class Controls {
 
     populateLevelButtons(levelsSet, zIndex) {
         this.levels.html("");
+        if(levelsSet.size <= 1) {
+            return;
+        }
         let levelsSorted = Array.from(levelsSet).sort(function (a, b) {
             return a - b;
         });
@@ -1129,7 +1132,7 @@ class Controls {
         let that = this;
         if (typeof ClipboardItem !== "undefined") {
             that.canvas.toBlob(blob => navigator.clipboard.write([new ClipboardItem({'image/png': blob})]));
-            this.showToast("Skopiowano do schowka")
+            this.showToast(translateString("Skopiowano do schowka"))
         } else {
             this.showToast("Twoja przeglądarka nie wspiera kopiowania do schowka")
         }
