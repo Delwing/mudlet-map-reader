@@ -1243,7 +1243,7 @@ jQuery.fn.mudletMap = function (settings) {
     paper.install(window);
 
     let area = params.get('area');
-    if (!area) {
+    if (!area && typeof position !== 'undefined') {
         area = position.area
     }
     if (!area) {
