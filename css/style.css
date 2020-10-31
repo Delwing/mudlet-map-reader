@@ -24,11 +24,11 @@ h2 {
     top: 5px;
 }
 
-h2 img {
+.logo {
     position: absolute;
-    width: 180px;
-    left: -110px;
-    top: -55px;
+    left: -37px;
+    width: 90px;
+    top: -38px;
 }
 
 
