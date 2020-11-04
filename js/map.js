@@ -240,19 +240,19 @@ class MapRenderer {
         for (let dir in room.exits) {
             if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
                 let neighbourRoom = roomIndex[room.exits[dir]];
-                if (neighbourRoom && neighbourRoom.render && exit.roomId !== room.id) {
+                if (neighbourRoom && neighbourRoom.render && neighbourRoom.roomId !== room.id) {
                     //neighbourRoom.render.strokeColor = supportSelectionColor;
                     neighbourRoom.exitRenders.forEach(exit => {
                         if (room.id === exit.roomId) {
                             let path = exit.render;
                             if (path !== undefined) {
+                                path.orgStrokeColor = path.strokeColor
                                 path.strokeColor = mainSelectionColor;
                             }
                         }
                     });
                 }
             }
-
         }
 
         if (this.controls.getSettings().dotSelectionMarker) {
@@ -274,20 +274,25 @@ class MapRenderer {
                 if (path !== undefined) {
                     path.strokeColor = path.orgStrokeColor;
                 }
-                let neighbourRoom = roomIndex[exit.roomId];
-                if (neighbourRoom && neighbourRoom.render) {
-                    neighbourRoom.render.strokeColor = neighbourRoom.render.orgStrokeColor;
-                    neighbourRoom.exitRenders.forEach(exit => {
-                        if (room.id === exit.roomId) {
-                            let path = exit.render;
-                            if (path !== undefined) {
-                                path.strokeColor = path.orgStrokeColor;
-                            }
-                        }
-                    });
-                }
             });
-            //room.circle.remove()
+
+            for (let dir in room.exits) {
+                if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
+                    let neighbourRoom = roomIndex[room.exits[dir]];
+                    if (neighbourRoom && neighbourRoom.render && neighbourRoom.roomId !== room.id) {
+                        //neighbourRoom.render.strokeColor = supportSelectionColor;
+                        neighbourRoom.exitRenders.forEach(exit => {
+                            if (room.id === exit.roomId) {
+                                let path = exit.render;
+                                if (path !== undefined) {
+                                    path.strokeColor = path.orgStrokeColor;
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
         }
         this.hideRoomInfo()
     }
