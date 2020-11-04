@@ -79,11 +79,9 @@ class MapRenderer {
             this.area.labels.forEach(value => this.renderLabel(value), this);
         }
 
-
         project.layers.forEach(function (layer) {
             layer.transform(new Matrix(1, 0, 0, -1, textOffset, textOffset));
         });
-
     }
 
     setDrawingBounds(text, textOffset) {
@@ -209,6 +207,8 @@ class MapRenderer {
         if (room.roomChar !== undefined) {
             this.renderChar(room);
         }
+
+        roomIndex[room.id] = room;
 
         let that = this;
         if (!this.controls.getSettings().disableClicks) {
