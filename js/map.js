@@ -79,9 +79,11 @@ class MapRenderer {
             this.area.labels.forEach(value => this.renderLabel(value), this);
         }
 
+
         project.layers.forEach(function (layer) {
             layer.transform(new Matrix(1, 0, 0, -1, textOffset, textOffset));
         });
+
     }
 
     setDrawingBounds(text, textOffset) {
@@ -128,7 +130,7 @@ class MapRenderer {
         let strokeWidth = 1;
         let size = this.baseSize;
         let roomShape;
-        if(!this.controls.getSettings().round) {
+        if (!this.controls.getSettings().round) {
             roomShape = new Path.Rectangle(room.getX(), room.getY(), size, size);
         } else {
             roomShape = new Path.Circle(room.getX() + size / 2, room.getY() + size / 2, size / 2);
@@ -139,7 +141,7 @@ class MapRenderer {
         }
 
         let strokeColor, frameColor;
-        if(this.controls.getSettings().frameMode) {
+        if (this.controls.getSettings().frameMode) {
             frameColor = [...color];
             color = [0, 0, 0];
         }
@@ -156,7 +158,7 @@ class MapRenderer {
             roomShape.strokeColor = new Color(0.8, 0.8, 0.8);
         }
 
-        if(this.controls.getSettings().frameMode) {
+        if (this.controls.getSettings().frameMode) {
             roomShape.strokeColor = frameColor
         }
 
@@ -169,6 +171,11 @@ class MapRenderer {
         for (let dir in room.exits) {
             if (this.ladders.indexOf(dir) <= -1) {
                 if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
+                    if (roomIndex[room.exits[dir]].exitRenders && roomIndex[room.exits[dir]].exitRenders.some(function (item) {
+                        return item.roomId === room.id;
+                    })) {
+                        continue;
+                    }
                     room.exitRenders.push({
                         roomId: room.exits[dir],
                         render: this.renderLink(room, dir, new Room(this.area.getRoomById(room.exits[dir]), this.baseSize, this.controls.getSettings().roomSize), room.exits[dir])
@@ -203,8 +210,6 @@ class MapRenderer {
             this.renderChar(room);
         }
 
-        roomIndex[room.id] = room;
-
         let that = this;
         if (!this.controls.getSettings().disableClicks) {
             room.render.onClick = function () {
@@ -230,19 +235,25 @@ class MapRenderer {
                 path.orgStrokeColor = path.strokeColor;
                 path.strokeColor = mainSelectionColor;
             }
-            let neighbourRoom = roomIndex[exit.roomId];
-            if (neighbourRoom && neighbourRoom.render && exit.roomId !== room.id) {
-                //neighbourRoom.render.strokeColor = supportSelectionColor;
-                neighbourRoom.exitRenders.forEach(exit => {
-                    if (room.id === exit.roomId) {
-                        let path = exit.render;
-                        if (path !== undefined) {
-                            path.strokeColor = mainSelectionColor;
-                        }
-                    }
-                });
-            }
         });
+
+        for (let dir in room.exits) {
+            if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
+                let neighbourRoom = roomIndex[room.exits[dir]];
+                if (neighbourRoom && neighbourRoom.render && exit.roomId !== room.id) {
+                    //neighbourRoom.render.strokeColor = supportSelectionColor;
+                    neighbourRoom.exitRenders.forEach(exit => {
+                        if (room.id === exit.roomId) {
+                            let path = exit.render;
+                            if (path !== undefined) {
+                                path.strokeColor = mainSelectionColor;
+                            }
+                        }
+                    });
+                }
+            }
+
+        }
 
         if (this.controls.getSettings().dotSelectionMarker) {
             room.circle = new Path.Circle(room.render.position, this.baseSize / 2);
@@ -313,7 +324,7 @@ class MapRenderer {
                 path.scale(3, exitPoint);
                 path.rotate(180, exitPoint);
                 let that = this;
-                if(!this.controls.getSettings().disableClicks) {
+                if (!this.controls.getSettings().disableClicks) {
                     path.onClick = function () {
                         that.onExitClick(roomProperties)
                     };
@@ -676,7 +687,7 @@ class Room {
     }
 
     getExitX(dir, round) {
-        if(round) {
+        if (round) {
             return this.getXMid()
         }
         switch (dir) {
@@ -700,7 +711,7 @@ class Room {
     }
 
     getExitY(dir, round) {
-        if(round) {
+        if (round) {
             return this.getYMid()
         }
         switch (dir) {
