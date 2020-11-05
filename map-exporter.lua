@@ -34,6 +34,7 @@ function MapExporter:exportRooms()
 				areaName = "Combined Area View",
 				rooms = {},
 				labels = {},
+				combinedAreaIDs = {},
 		}
     for areaName, areaId in pairs(getAreaTable()) do
 
@@ -47,6 +48,14 @@ function MapExporter:exportRooms()
             rooms = {},
             labels = {}
         }
+				if MapExporterCombinedAreaView and
+					 MapExporterCombinedAreaView[areaRooms.areaName] then
+					  areaRooms.combinedAreaView = true
+						areaRooms.xShift = MapExporterCombinedAreaView[areaRooms.areaName].xShift
+						areaRooms.yShift = MapExporterCombinedAreaView[areaRooms.areaName].yShift
+						areaRooms.zShift = MapExporterCombinedAreaView[areaRooms.areaName].zShift
+						table.insert(combinedAreaViewRooms.combinedAreaIDs,areaId)
+				end
 				
         labels = {}
         if type(labelIds) == "table" then
