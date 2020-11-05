@@ -56,7 +56,13 @@ function MapExporter:exportRooms()
                 table.insert(labels, label)
 								if MapExporterCombinedAreaView and
 									 MapExporterCombinedAreaView[areaRooms.areaName] then
-										table.insert(combinedAreaViewRooms.labels,label)
+									  local combinedAreaViewLabel = getMapLabel(areaId, k)
+										combinedAreaViewLabel.id = combinedAreaViewRooms.areaId
+										local shift = function(a,b) if a and type(a) == "number" and b and type(b) == "number" then return a+b else return a end end
+										combinedAreaViewLabel.X = shift(combinedAreaViewLabel.X,MapExporterCombinedAreaView[areaRooms.areaName].xShift)
+										combinedAreaViewLabel.Y = shift(combinedAreaViewLabel.Y,MapExporterCombinedAreaView[areaRooms.areaName].yShift)
+										combinedAreaViewLabel.Z = shift(combinedAreaViewLabel.Z,MapExporterCombinedAreaView[areaRooms.areaName].zShift)										 
+										table.insert(combinedAreaViewRooms.labels,combinedAreaViewLabel)
 								end
             end
         end
