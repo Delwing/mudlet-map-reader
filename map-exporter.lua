@@ -29,28 +29,41 @@ end
 
 function MapExporter:exportRooms()
     local areas = {}
+		local combinedAreaViewRooms = {
+				areaId = 99999999,
+				areaName = "Combined Area View",
+				rooms = {},
+				labels = {},
+		}
     for areaName, areaId in pairs(getAreaTable()) do
 
         local areaId = tonumber(areaId)
         local rooms = getAreaRooms(areaId)
         local labelIds = getMapLabels(areaId)
 
+        local areaRooms = {
+            areaId = areaId,
+            areaName = getRoomAreaName(areaId),
+            rooms = {},
+            labels = {}
+        }
+				
         labels = {}
         if type(labelIds) == "table" then
             for k,v in pairs(labelIds) do
                 local label = getMapLabel(areaId, k)
                 label.id = k
                 table.insert(labels, label)
+								if MapExporterCombinedAreaView and
+									 MapExporterCombinedAreaView[areaRooms.areaName] then
+										table.insert(combinedAreaViewRooms.labels,label)
+								end
             end
         end
+				areaRooms.labels = labels
 
         local i = 0
-        local areaRooms = {
-            areaId = areaId,
-            areaName = getRoomAreaName(areaId),
-            rooms = {},
-            labels = labels
-        }
+
         for k, v in pairs(rooms) do
             local x,y,z = getRoomCoordinates(v)
             local userDataKeys = getRoomUserDataKeys(v)
@@ -74,6 +87,29 @@ function MapExporter:exportRooms()
                 userData = table.size(userData) > 0 and userData or nil
             }
             table.insert(areaRooms.rooms, roomInfo)
+						if MapExporterCombinedAreaView and
+							 MapExporterCombinedAreaView[areaRooms.areaName] then
+								local shift = function(a,b) if a and type(a) == "number" and b and type(b) == "number" then return a+b else return a end end
+								local combinedX = shift(roomInfo.x,MapExporterCombinedAreaView[areaRooms.areaName].xShift)
+								local combinedY = shift(roomInfo.y,MapExporterCombinedAreaView[areaRooms.areaName].yShift)
+								local combinedZ = shift(roomInfo.z,MapExporterCombinedAreaView[areaRooms.areaName].zShift)							 
+								local combinedRoomInfo = {
+										id = v,
+										x = combinedX,
+										y = combinedY,
+										z = combinedZ,
+										name = getRoomName(v),
+										exits = getRoomExits(v),
+										env = getRoomEnv(v),
+										roomChar = getRoomChar(v),
+										doors = getDoors(v),
+										customLines = self:fixCustomLines(getCustomLines(v)),
+										specialExits = getSpecialExitsSwap(v),
+										stubs = getExitStubs1(v),
+										userData = table.size(userData) > 0 and userData or nil
+								}
+								table.insert(combinedAreaViewRooms.rooms,combinedRoomInfo)
+						end
         end
 
         if areaId > 0 then
@@ -81,6 +117,9 @@ function MapExporter:exportRooms()
         end
 
     end
+		if MapExporterCombinedAreaView then
+				table.insert(areas,combinedAreaViewRooms)
+		end
 
     local fileName = self.dir .. "data/mapExport.js"
     file = io.open (fileName, "w+")
