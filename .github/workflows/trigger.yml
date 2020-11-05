@@ -13,3 +13,4 @@ jobs:
         repository: Delwing/mudlet-map-browser
         token: ${{ secrets.BROWSER_ACCESS_TOKEN }}
         event-type: release
+        client-payload: '{"message" : "Refer to https://github.com/Delwing/mudlet-map-reader for details."}'
