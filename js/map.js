@@ -176,10 +176,12 @@ class MapRenderer {
             if (this.ladders.indexOf(dir) <= -1) {
                 if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
                     let secondRoom = new Room(this.area.getRoomById(room.exits[dir]), this.baseSize, this.controls.getSettings().roomSize)
-                    if (roomIndex[room.exits[dir]].exitRenders && secondRoom.exists() && roomIndex[room.exits[dir]].exitRenders.some(function (item) {
+                    if (roomIndex[room.exits[dir]].exitRenders && roomIndex[room.exits[dir]].exitRenders.some(function (item) {
                         return item.roomId === room.id;
                     })) {
-                        continue;
+                        if(secondRoom.exists()) {
+                            continue;
+                        }
                     }
                     room.exitRenders.push({
                         roomId: room.exits[dir],
