@@ -1,3 +1,9 @@
+if(!translateString) {
+    function translateString(input) {
+        return input
+    }
+}
+
 let envColors = {};
 colors.forEach(function (element) {
     envColors[element.envId] = element.colors;
@@ -169,14 +175,15 @@ class MapRenderer {
         for (let dir in room.exits) {
             if (this.ladders.indexOf(dir) <= -1) {
                 if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
-                    if (roomIndex[room.exits[dir]].exitRenders && roomIndex[room.exits[dir]].exitRenders.some(function (item) {
+                    let secondRoom = new Room(this.area.getRoomById(room.exits[dir]), this.baseSize, this.controls.getSettings().roomSize)
+                    if (roomIndex[room.exits[dir]].exitRenders && secondRoom.exists() && roomIndex[room.exits[dir]].exitRenders.some(function (item) {
                         return item.roomId === room.id;
                     })) {
                         continue;
                     }
                     room.exitRenders.push({
                         roomId: room.exits[dir],
-                        render: this.renderLink(room, dir, new Room(this.area.getRoomById(room.exits[dir]), this.baseSize, this.controls.getSettings().roomSize), room.exits[dir])
+                        render: this.renderLink(room, dir, secondRoom, room.exits[dir])
                     });
                 }
             } else {
@@ -1290,7 +1297,7 @@ jQuery.fn.mudletMap = function (settings) {
         showLabels: true,
         radiusLimit: 0,
         monochromatic: false,
-        dotSelectionMarker: false,
+        dotSelect1ionMarker: false,
         disableDrag: false,
         disableRedrawOnResize: false,
         disableKeyBinds: false,
