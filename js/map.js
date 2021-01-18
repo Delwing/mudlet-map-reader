@@ -85,6 +85,10 @@ class MapRenderer {
             this.area.labels.forEach(value => this.renderLabel(value), this);
         }
 
+        if (this.controls.getExtras().highlights !== undefined) {
+            this.controls.getExtras().highlights.forEach(value => this.renderHighlight(value));
+        }
+
         project.layers.forEach(function (layer) {
             layer.transform(new Matrix(1, 0, 0, -1, textOffset, textOffset));
         });
@@ -588,6 +592,18 @@ class MapRenderer {
         text.scale(1, -1, new Point(room.getXMid(), room.getYMid()));
     }
 
+    renderHighlight(roomId) {
+        let room = roomIndex[roomId]
+        if (room.exists()) {
+            this.labelsLayer.activate();
+            let circle = new Path.Circle(new Point(room.getXMid(), room.getYMid()), this.baseSize * 0.40);
+            circle.fillColor = 'red';
+            circle.strokeColor = '#e8fdff';
+            circle.strokeWidth = 5;
+            circle.bringToFront();
+        }
+    }
+
     calculateCoordinates(coord) {
         return coord * (10 / parseInt(this.controls.getSettings().roomSize)) * this.baseSize;
     }
@@ -832,7 +848,7 @@ class Area {
 
 class Controls {
 
-    constructor(canvas, settings, mapData) {
+    constructor(canvas, settings, mapData, extras) {
         this.canvas = canvas;
         this.reader = new MapReader(mapData);
         this.scale = 1;
@@ -853,6 +869,7 @@ class Controls {
         this.settingsForm = jQuery("#settings form");
 
         this.settings = settings;
+        this.extras = extras || {};
 
         this.activateMouseEvents();
         this.populateSelectBox(this.select);
@@ -1273,9 +1290,13 @@ class Controls {
     getSettings() {
         return this.settings;
     }
+
+    getExtras() {
+        return this.extras;
+    }
 }
 
-jQuery.fn.mudletMap = function (settings) {
+jQuery.fn.mudletMap = function (settings, extras) {
 
     let canvas = this[0];
     paper.setup(canvas);
@@ -1314,7 +1335,7 @@ jQuery.fn.mudletMap = function (settings) {
         settings = {...settings, ...JSON.parse(loaded)}
     }
 
-    window.MapControls = new Controls(canvas, settings, mapData);
+    window.MapControls = new Controls(canvas, settings, mapData, extras);
     let roomSearch = params.get('id');
     if (!roomSearch) {
         MapControls.draw(area, 0);
