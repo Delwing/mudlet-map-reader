@@ -593,8 +593,9 @@ class MapRenderer {
     }
 
     renderHighlight(roomId) {
-        let room = roomIndex[roomId]
+        let room = new Room(this.area.getRoomById(roomId), this.baseSize, this.controls.getSettings().roomSize);
         if (room.exists()) {
+            console.log("DRAWIN FROM ",room)
             this.labelsLayer.activate();
             let circle = new Path.Circle(new Point(room.getXMid(), room.getYMid()), this.baseSize * 0.40);
             circle.fillColor = 'red';
