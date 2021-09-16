@@ -369,7 +369,7 @@ var PageControls = /*#__PURE__*/function () {
       var destRoom = this.reader.getRoomById(id);
 
       if (destRoom.area !== this.renderer.area.areaId) {
-        var _area = this.reader.getAreaProperties(destRoom.area);
+        var _area = this.reader.getAreaProperties(destRoom.areaId);
 
         areaLink = " ->  " + '<a href="#" data-room="' + destRoom.id + '">' + _area.areaName + "</a>";
       }
