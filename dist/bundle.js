@@ -1041,7 +1041,7 @@ var Renderer = /*#__PURE__*/function () {
 
       var exitKey = new Array(room.id, targetId).sort().join("#");
 
-      if (this.exitsRendered[exitKey]) {
+      if (this.exitsRendered[exitKey] && room.doors[dirLongToShort(dir)] === undefined) {
         return;
       }
 
