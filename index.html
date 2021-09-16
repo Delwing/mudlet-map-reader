@@ -4,18 +4,6 @@
     <meta charset="UTF-8">
     <title>Mapa Arkadii</title>
     <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico"/>
-    <script src="data/current.js"></script>
-    <script src="data/mapExport.js"></script>
-    <script src="data/colors.js"></script>
-    <script src="js/paper-full.min.js"></script>
-    <script src="js/jquery.js"></script>
-    <script src="js/jquery-mousewheel.min.js"></script>
-    <script src="js/bootstrap.bundle.min.js"></script>
-    <script src="js/jquery-localization.min.js"></script>
-    <script src="js/translations.js"></script>
-    <script src="js/popper.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/script.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="css/translations.css" rel="stylesheet" type="text/css">
     <link href="css/style.css" rel="stylesheet" type="text/css">
@@ -25,7 +13,7 @@
 <header>
     <div class="left-header">
         <h2>
-            <img src="images/logo.png" class="logo" alt="logo">
+            <img src="images/logo.png" class="logo" id="logo" alt="logo">
             <a href="index.html"><span id="title">Mapa Arkadii</span></a>
         </h2>
         <div class="map-controls">
@@ -110,8 +98,8 @@
                         <input class="form-control" type="number" id="location-size" name="roomSize">
                     </div>
                     <div class="form-group">
-                        <label for="grid-size">Wielkość siatki</label>
-                        <input class="form-control" type="number" id="grid-size" name="baseSize">
+                        <label for="exits-size">Grubość linii</label>
+                        <input class="form-control" type="number" id="exits-size" name="exitsSize">
                     </div>
                     <div class="form-group">
                         <div class="form-check">
@@ -127,7 +115,7 @@
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="round" value="1" id="round-check">
+                            <input class="form-check-input" type="checkbox" name="isRound" value="1" id="round-check">
                             <label class="form-check-label" for="round-check">
                                 Okrągłe lokacje
                             </label>
@@ -166,8 +154,6 @@
             </div>
             <div class="modal-body">
                 <p><kbd>F1</kbd> - <span>ta pomoc</span></p>
-                <p><kbd>Ctrl + S</kbd> - <span>zapisz obraz</span></p>
-                <p><kbd>Ctrl + C</kbd> - <span>kopiowanie obrazka do schowka</span></p>
                 <p><kbd>Ctrl + F</kbd> - <span>wyszukiwaie</span></p>
                 <p></p>
                 <p><kbd>+</kbd> - <span>przybliżenie</span></p>
@@ -207,6 +193,7 @@
             <li>x: <span class="coord-x"></span></li>
             <li>y: <span class="coord-y"></span></li>
             <li>z: <span class="coord-z"></span></li>
+            <li>Hash: <span class="room-hash"></span></li>
         </ul>
         <div class="exits">
             <p><span>Wyjścia</span>:</p>
@@ -222,6 +209,14 @@
         </div>
     </div>
     <canvas id="map" resize="true"></canvas>
+    <script src="data/mapExport.js"></script>
+    <script src="data/colors.js"></script>
+    <script src="data/current.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/jquery-localization.min.js"></script>
+    <script src="js/translations.js"></script>
+    <script src="dist/bundle.js"></script>
 </div>
 </body>
 </html>

@@ -595,7 +595,6 @@ class MapRenderer {
     renderHighlight(roomId) {
         let room = new Room(this.area.getRoomById(roomId), this.baseSize, this.controls.getSettings().roomSize);
         if (room.exists()) {
-            console.log("DRAWIN FROM ",room)
             this.labelsLayer.activate();
             let circle = new Path.Circle(new Point(room.getXMid(), room.getYMid()), this.baseSize * 0.40);
             circle.fillColor = 'red';
@@ -618,6 +617,8 @@ class MapRenderer {
         infoBox.find(".coord-x").html(room.x);
         infoBox.find(".coord-y").html(room.y);
         infoBox.find(".coord-z").html(room.z);
+        infoBox.find(".room-hash").html("")
+        infoBox.find(".room-hash").html(room.hash);
 
         this.infoExitsGroup(infoBox.find(".exits"), room.exits);
         this.infoExitsGroup(infoBox.find(".special"), room.specialExits);
@@ -670,13 +671,11 @@ class MapRenderer {
     }
 
     renderLabel(value) {
-        let text = new PointText(new Point(this.calculateCoordinates(value.X) + this.calculateCoordinates(value.Width) / 2, this.calculateCoordinates(value.Y) - this.calculateCoordinates(value.Height) / 2));
-        text.fillColor = 'yellow';
-        text.fontSize = 15;
-        text.content = value.Text;
-        text.justification = 'center';
-        text.locked = true;
-        text.scale(1, -1)
+        let label = new paper.Raster("data:image/png;base64," + value.Pixmap)
+        label.position = new Point(this.calculateCoordinates(value.X) + this.calculateCoordinates(value.Width) / 2, this.calculateCoordinates(value.Y) - this.calculateCoordinates(value.Height) / 2)
+        label.width = this.calculateCoordinates(value.Width)
+        label.height = this.calculateCoordinates(value.Height)
+        label.scale(1,-1)
     }
 
     focus(room) {
@@ -787,6 +786,13 @@ class MapReader {
 
     getArea(areaId, zIndex, limits) {
         let area = this.data[mapDataIndex[areaId]];
+
+        // area.rooms = area.rooms.concat(this.data[mapDataIndex[50]].rooms)
+        // area.rooms = area.rooms.concat(this.data[mapDataIndex[34]].rooms)
+        // area.rooms = area.rooms.concat(this.data[mapDataIndex[37]].rooms)
+        // area.rooms = area.rooms.concat(this.data[mapDataIndex[35]].rooms)
+        
+
         let levels = new Set();
         //TODO: Not optimal...
         let candidateArea = new Area(areaId, area.areaName, area.rooms.filter(room => {
@@ -821,17 +827,21 @@ class Area {
     }
 
     getAreaBounds() {
-        let minX = 9999999999;
-        let minY = 9999999999;
-        let maxX = -9999999999;
-        let maxY = -9999999999;
+        if (this.bounds === undefined) {
+            let minX = 9999999999;
+            let minY = 9999999999;
+            let maxX = -9999999999;
+            let maxY = -9999999999;
         this.rooms.forEach(function (element) {
             minX = Math.min(minX, element.x);
             minY = Math.min(minY, element.y);
             maxX = Math.max(maxX, element.x);
             maxY = Math.max(maxY, element.y);
         });
-        return {minX: minX, minY: minY, maxX: maxX, maxY: maxY}
+            this.bounds = { minX: minX, minY: minY, maxX: maxX, maxY: maxY }
+        }
+
+        return this.bounds
     }
 
     getRoomById(id) {

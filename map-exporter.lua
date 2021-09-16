@@ -35,11 +35,12 @@ function MapExporter:exportRooms()
         local rooms = getAreaRooms(areaId)
         local labelIds = getMapLabels(areaId)
 
-        labels = {}
+        local labels = {}
         if type(labelIds) == "table" then
             for k,v in pairs(labelIds) do
                 local label = getMapLabel(areaId, k)
                 label.id = k
+                label.pixMap = nil
                 table.insert(labels, label)
             end
         end
@@ -71,7 +72,8 @@ function MapExporter:exportRooms()
                 customLines = self:fixCustomLines(getCustomLines(v)),
                 specialExits = getSpecialExitsSwap(v),
                 stubs = getExitStubs1(v),
-                userData = table.size(userData) > 0 and userData or nil
+                userData = table.size(userData) > 0 and userData or nil,
+                hash = getRoomHashByID(v)
             }
             table.insert(areaRooms.rooms, roomInfo)
         end
@@ -83,7 +85,7 @@ function MapExporter:exportRooms()
     end
 
     local fileName = self.dir .. "data/mapExport.js"
-    file = io.open (fileName, "w+")
+    local file = io.open (fileName, "w+")
     file:write("mapData = ")
     file:write(yajl.to_string(areas))
     file:close()
@@ -116,7 +118,7 @@ function MapExporter:exportColors()
     colors = adjustedColors
 
     local colorsFileName = self.dir .. "data/colors.js"
-    colorsFile = io.open (colorsFileName, "w+")
+    local colorsFile = io.open (colorsFileName, "w+")
     colorsFile:write("colors = ")
     colorsFile:write(yajl.to_string(colors))
     colorsFile:close()

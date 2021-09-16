@@ -26,8 +26,8 @@ jQuery(function () {
             'Wielkość lokacji': {
                 'en_GB': 'Location size',
             },
-            'Wielkość siatki': {
-                'en_GB': 'Grid size',
+            'Grubość linii': {
+                'en_GB': 'Exit thickness',
             },
             'Krawędzie lokacji': {
                 'en_GB': 'Location borders',
@@ -137,6 +137,8 @@ jQuery(function () {
     let savedLanguage = localStorage.getItem("lang");
     if (savedLanguage) {
         translatePage(savedLanguage);
+    } else {
+        translatePage("pl_PL");
     }
 
     getActiveLanguages().forEach(langCode => {
