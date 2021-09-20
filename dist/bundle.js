@@ -368,7 +368,7 @@ var PageControls = /*#__PURE__*/function () {
       var areaLink = "";
       var destRoom = this.reader.getRoomById(id);
 
-      if (destRoom.area !== this.renderer.area.areaId) {
+      if (destRoom.areaId !== this.renderer.area.areaId) {
         var _area = this.reader.getAreaProperties(destRoom.areaId);
 
         areaLink = " ->  " + '<a href="#" data-room="' + destRoom.id + '">' + _area.areaName + "</a>";
@@ -839,6 +839,8 @@ var Settings = function Settings() {
   _defineProperty(this, "areaName", true);
 
   _defineProperty(this, "showLabels", true);
+
+  _defineProperty(this, "uniformLevelSize", false);
 };
 
 paper.Item.prototype.registerClick = function (callback) {
@@ -882,12 +884,12 @@ var Renderer = /*#__PURE__*/function () {
     this.roomFactor = this.roomSize / gridSize;
     this.exitFactor = this.settings.exitsSize * 0.01;
     this.roomDiagonal = this.roomFactor * Math.sqrt(2);
-    this.ladders = ["up", "down", "u", "d"];
+    this.innerExits = ["up", "down", "u", "d", "in", "out", "i", "u"];
     this.paper = new paper.PaperScope();
+    this.bounds = this.area.getAreaBounds(this.settings.uniformLevelSize);
 
     if (element == undefined) {
-      var bounds = this.area.getAreaBounds();
-      element = new paper.Size((bounds.width + padding * 2) * this.scale, (bounds.height + padding * 2) * this.scale);
+      element = new paper.Size((this.bounds.width + padding * 2) * this.scale, (this.bounds.height + padding * 2) * this.scale);
       this.isVisual = false;
     } else {
       this.isVisual = true;
@@ -915,8 +917,7 @@ var Renderer = /*#__PURE__*/function () {
 
       var pngRender = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       this.pngRender = pngRender;
-      var bounds = this.area.getAreaBounds();
-      this.renderBackground(bounds.minX - padding, bounds.minY - padding, bounds.maxX + padding, bounds.maxY + padding);
+      this.renderBackground(this.bounds.minX - padding, this.bounds.minY - padding, this.bounds.maxX + padding, this.bounds.maxY + padding);
       this.renderHeader();
       this.area.rooms.filter(function (room) {
         return room.z == _this.area.zIndex;
@@ -931,7 +932,7 @@ var Renderer = /*#__PURE__*/function () {
         }, this);
       }
 
-      this.matrix = new paper.Matrix(1, 0, 0, -1, -bounds.minX + padding, bounds.maxY + padding).scale(this.scale, new paper.Point(bounds.minX, bounds.maxY));
+      this.matrix = new paper.Matrix(1, 0, 0, -1, -this.bounds.minX + padding, this.bounds.maxY + padding).scale(this.scale, new paper.Point(this.bounds.minX, this.bounds.maxY));
       this.transform();
 
       if (this.isVisual) {
@@ -943,11 +944,10 @@ var Renderer = /*#__PURE__*/function () {
     value: function transform() {
       var _this2 = this;
 
-      var bounds = this.area.getAreaBounds();
       var padding = 1 * this.scale;
       this.paper.project.layers.forEach(function (layer) {
         layer.applyMatrix = false;
-        layer.matrix = new paper.Matrix(1, 0, 0, -1, -bounds.minX + padding, bounds.maxY + padding).scale(_this2.scale, new paper.Point(bounds.minX, bounds.maxY));
+        layer.matrix = new paper.Matrix(1, 0, 0, -1, -_this2.bounds.minX + padding, _this2.bounds.maxY + padding).scale(_this2.scale, new paper.Point(_this2.bounds.minX, _this2.bounds.maxY));
       });
     }
   }, {
@@ -1003,12 +1003,12 @@ var Renderer = /*#__PURE__*/function () {
       room.exitsRenders = room.exitsRenders != undefined ? room.exitsRenders : [];
 
       for (var dir in room.exits) {
-        if (this.ladders.indexOf(dir) <= -1) {
+        if (this.innerExits.indexOf(dir) <= -1) {
           if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
             this.renderLink(room, room.exits[dir], dir);
           }
         } else {
-          this.renderLadder(room, dir);
+          this.renderInnerExit(room, dir);
         }
       }
 
@@ -1022,8 +1022,8 @@ var Renderer = /*#__PURE__*/function () {
         this.renderCustomLine(room, _dir2);
       }
 
-      for (var _dir3 in room.exitStubs) {
-        this.renderStub(room, dirNumbers[room.exitStubs[_dir3]]);
+      for (var _dir3 in room.stubs) {
+        this.renderStub(room, dirNumbers[room.stubs[_dir3]]);
       }
 
       this.renderChar(room);
@@ -1222,8 +1222,8 @@ var Renderer = /*#__PURE__*/function () {
       this.linkLayer.activate();
       var path;
 
-      if (this.ladders.indexOf(dir) > -1) {
-        path = this.renderLadder(room, dir, true);
+      if (this.innerExits.indexOf(dir) > -1) {
+        path = this.renderInnerExit(room, dir, true);
       } else {
         var startPoint = new paper.Point(room.x + this.roomFactor * 0.5, room.y + this.roomFactor * 0.5);
         var exitPoint = new paper.Point(this.getExitX(room.x, dir), this.getExitY(room.y, dir));
@@ -1240,10 +1240,68 @@ var Renderer = /*#__PURE__*/function () {
       return path;
     }
   }, {
-    key: "renderLadder",
-    value: function renderLadder(room, direction) {
+    key: "renderInnerExit",
+    value: function renderInnerExit(room, direction) {
       var stub = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       this.labelsLayer.activate();
+      var group = new paper.Group();
+
+      if (direction === "down" || direction == "d") {
+        group.addChild(this.renderInnerTriangle(room, direction, stub));
+      }
+
+      if (direction === "up" || direction === "u") {
+        group.addChild(this.renderInnerTriangle(room, direction, stub));
+        group.rotate(180, room.render.bounds.center);
+      }
+
+      if (direction === "in" || direction === "i") {
+        var left = this.renderInnerTriangle(room, direction, stub);
+        left.rotate(90, room.render.bounds.center);
+        left.scale(0.4, room.render.bounds.center);
+        left.position.x -= 0.01;
+        var right = this.renderInnerTriangle(room, direction, stub);
+        right.scale(0.4, room.render.bounds.center);
+        right.rotate(270, room.render.bounds.center);
+        right.position.x += 0.01;
+        group.addChild(left);
+        group.addChild(right);
+      }
+
+      if (direction === "out" || direction === "o") {
+        var _left = this.renderInnerTriangle(room, direction, stub);
+
+        _left.rotate(270, room.render.bounds.center);
+
+        _left.scale(0.5, room.render.bounds.rightCenter);
+
+        _left.rotate(180);
+
+        _left.position.x -= 0.01;
+
+        var _right = this.renderInnerTriangle(room, direction, stub);
+
+        _right.rotate(90, room.render.bounds.center);
+
+        _right.scale(0.5, room.render.bounds.leftCenter);
+
+        _right.rotate(180);
+
+        _right.position.x += 0.01;
+        group.addChild(_left);
+        group.addChild(_right);
+      }
+
+      if (this.settings.isRound) {
+        group.scale(0.8, 0.8, new paper.Point(room.render.bounds.center));
+      }
+
+      group.locked = true;
+      return group;
+    }
+  }, {
+    key: "renderInnerTriangle",
+    value: function renderInnerTriangle(room, direction, stub) {
       var triangle = new paper.Path.RegularPolygon(new paper.Point(room.render.bounds.bottomCenter).subtract(new paper.Point(0, 0.2 * this.roomFactor)), 3, 0.3 * this.roomFactor);
       triangle.scale(1.2, 0.75);
       var baseColor = this.lightnessDependantColor(room);
@@ -1272,15 +1330,6 @@ var Renderer = /*#__PURE__*/function () {
       }
 
       triangle.bringToFront();
-
-      if (direction === "up" || direction === "u") {
-        triangle.rotate(180, new paper.Point(room.render.bounds.center));
-      }
-
-      if (this.settings.isRound) {
-        triangle.scale(0.8, 0.8, new paper.Point(room.render.bounds.center));
-      }
-
       return triangle;
     }
   }, {
@@ -1343,7 +1392,7 @@ var Renderer = /*#__PURE__*/function () {
       } else {
         var background = new paper.Path.Rectangle(new paper.Point(value.X, value.Y - value.Height), new paper.Size(value.Width, value.Height));
         background.fillColor = new paper.Color(value.BgColor.r / 255, value.BgColor.g / 255, value.BgColor.b / 255);
-        var text = new paper.PointText(background.bounds.center.add(0, 0.04));
+        var text = new paper.PointText(background.bounds.center.add(0, 0.15));
         text.fillColor = new paper.Color(value.FgColor.r / 255, value.FgColor.g / 255, value.FgColor.b / 255);
         text.fontSize = 0.75;
         text.content = value.Text;
@@ -1519,7 +1568,9 @@ var dirs = {
   southeast: "se",
   southwest: "sw",
   up: "u",
-  down: "d"
+  down: "d",
+  "in": "i",
+  out: "o"
 };
 var dirNumbers = {
   1: "n",
@@ -1531,7 +1582,9 @@ var dirNumbers = {
   7: "se",
   8: "sw",
   9: "u",
-  10: "d"
+  10: "d",
+  11: "i",
+  12: "o"
 };
 
 function dirsShortToLong(dir) {
@@ -1573,13 +1626,15 @@ var Area = /*#__PURE__*/function () {
     value: function getAreaBounds() {
       var _this = this;
 
+      var full = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
       if (this.bounds === undefined) {
         var minX = 9999999999;
         var minY = 9999999999;
         var maxX = -9999999999;
         var maxY = -9999999999;
         this.rooms.forEach(function (room) {
-          if (room.z !== _this.zIndex) {
+          if (!full && room.z !== _this.zIndex) {
             return;
           }
 
@@ -1589,7 +1644,7 @@ var Area = /*#__PURE__*/function () {
           maxY = Math.max(maxY, room.y);
         });
         this.labels.forEach(function (label) {
-          if (label.Z !== _this.zIndex) {
+          if (!full && label.Z !== _this.zIndex) {
             return;
           }
 
