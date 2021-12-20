@@ -50,6 +50,9 @@ var PageControls = /*#__PURE__*/function () {
     this.map.on("zoom", function (event) {
       return _this.adjustZoomBar(event.detail);
     });
+    this.map.on("zoom", function (event) {
+      return _this.zoom = event.detail.zoom;
+    });
     this.map.on("goToArea", function (event) {
       return setTimeout(function () {
         return _this.renderArea(event.detail.areaId, event.detail.z);
@@ -167,11 +170,15 @@ var PageControls = /*#__PURE__*/function () {
         this.renderer.clear();
       }
 
+      this.hideRoomInfo();
       this.renderer = new Renderer(document.getElementById("map"), this.reader, area, this.reader.getColors(), this.settings);
-      this.renderer.render();
       this.select.val(areaId);
       this.populateLevelButtons(area.getLevels(), zIndex);
       this.zIndex = zIndex;
+
+      if (this.settings.keepZoomLevel && this.zoom) {
+        this.renderer.controls.setZoom(this.zoom);
+      }
     }
   }, {
     key: "genericSetup",
@@ -279,7 +286,7 @@ var PageControls = /*#__PURE__*/function () {
 
       if (area !== undefined) {
         this.renderArea(area.areaId, area.zIndex);
-        this.renderer.controls.setZoom(1);
+        this.renderer.controls.setZoom(10);
         this.renderer.controls.centerRoom(id);
       } else {
         this.showToast("Nie znaleziono takiej lokacji");
@@ -480,7 +487,7 @@ var PageControls = /*#__PURE__*/function () {
           event.preventDefault();
         }
 
-        if (event.ctrlKey && event.key === "KeyF") {
+        if (event.ctrlKey && event.code === "KeyF") {
           event.preventDefault();
 
           _this3.showSearch();
@@ -841,6 +848,10 @@ var Settings = function Settings() {
   _defineProperty(this, "showLabels", true);
 
   _defineProperty(this, "uniformLevelSize", false);
+
+  _defineProperty(this, "fontFamily", 'sans-serif');
+
+  _defineProperty(this, "mapBackground", "#000000");
 };
 
 paper.Item.prototype.registerClick = function (callback) {
@@ -908,6 +919,7 @@ var Renderer = /*#__PURE__*/function () {
     this.overlayLayer = new paper.Layer();
     this.exitsRendered = {};
     this.defualtColor = new paper.Color(this.colors["default"][0] / 255, this.colors["default"][1] / 255, this.colors["default"][2] / 255);
+    this.render();
   }
 
   _createClass(Renderer, [{
@@ -918,7 +930,7 @@ var Renderer = /*#__PURE__*/function () {
       var pngRender = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       this.pngRender = pngRender;
       this.renderBackground(this.bounds.minX - padding, this.bounds.minY - padding, this.bounds.maxX + padding, this.bounds.maxY + padding);
-      this.renderHeader();
+      this.renderHeader(this.bounds.minX - padding / 2, this.bounds.maxY + padding / 2);
       this.area.rooms.filter(function (room) {
         return room.z == _this.area.zIndex;
       }).forEach(function (room) {
@@ -927,7 +939,9 @@ var Renderer = /*#__PURE__*/function () {
 
       if (this.area.labels !== undefined && this.settings.showLabels) {
         this.bgLabels.activate();
-        this.area.labels.forEach(function (value) {
+        this.area.labels.filter(function (label) {
+          return label.Z == _this.area.zIndex;
+        }).forEach(function (value) {
           return _this.renderLabel(value);
         }, this);
       }
@@ -957,20 +971,20 @@ var Renderer = /*#__PURE__*/function () {
 
       this.backgroundLayer.activate();
       var background = new paper.Path.Rectangle(new paper.Point(x1, y1), new paper.Point(x2, y2));
-      background.fillColor = new paper.Color(0, 0, 0);
+      background.fillColor = new paper.Color(this.settings.mapBackground);
       background.registerClick(function () {
         _this3.emitter.dispatchEvent(new CustomEvent("backgroundClick"));
       });
     }
   }, {
     key: "renderHeader",
-    value: function renderHeader() {
+    value: function renderHeader(x, y) {
       if (this.settings.areaName) {
         this.backgroundLayer.activate();
-        var bounds = this.getBounds();
-        var header = new paper.PointText(bounds.x + 2.5, bounds.y + bounds.height - 2.5);
+        var header = new paper.PointText(x, y);
         header.fillColor = new paper.Color(1, 1, 1, 1);
         header.fontSize = 2.5;
+        header.fontFamily = this.settings.fontFamily;
         header.content = this.area.areaName;
         header.scale(1, -1);
       }
@@ -1338,7 +1352,7 @@ var Renderer = /*#__PURE__*/function () {
       this.charsLayer.activate();
 
       if (room.roomChar) {
-        var size = 0.85 * this.roomFactor;
+        var size = 0.85 * this.roomFactor / room.roomChar.length;
         var x = this.pngRender ? room.render.position.x - 0.1 : room.render.position.x;
         var text = new paper.PointText(x, room.render.position.y + size / 4);
 
@@ -1396,7 +1410,7 @@ var Renderer = /*#__PURE__*/function () {
         text.fillColor = new paper.Color(value.FgColor.r / 255, value.FgColor.g / 255, value.FgColor.b / 255);
         text.fontSize = 0.75;
         text.content = value.Text;
-        text.fontFamily = "Arial";
+        text.fontFamily = this.settings.fontFamily;
         text.justification = "center";
         text.locked = true;
         text.scale(1, -1);
@@ -1494,14 +1508,17 @@ var Renderer = /*#__PURE__*/function () {
       this.overlayLayer.activate();
       var room = this.area.getRoomById(id);
       var circle = new paper.Shape.Circle(new paper.Point(room.x + this.roomFactor * 0.5, room.y + this.roomFactor * 0.5), this.roomDiagonal * 0.6);
-      circle.fillColor = new paper.Color(0.5, 0.1, 0.1, 0.1);
-      circle.strokeWidth = this.exitFactor;
+      circle.fillColor = new paper.Color(0.5, 0.1, 0.1, 0.2);
+      circle.strokeWidth = this.exitFactor * 5;
+      circle.hadowColor = new paper.Color(1, 1, 1);
+      circle.shadowBlur = 12;
 
       if (color === undefined) {
         color = [0, 0.9, 0.7];
       }
 
       circle.strokeColor = new paper.Color(color[0], color[1], color[2]);
+      circle.dashArray = [0.05, 0.05];
       this.position = circle;
     }
   }, {
@@ -1539,6 +1556,26 @@ var Renderer = /*#__PURE__*/function () {
     key: "clear",
     value: function clear() {
       this.paper.clear();
+    }
+  }, {
+    key: "exportSvg",
+    value: function exportSvg(roomId, padding) {
+      var bounds = 'content';
+
+      if (roomId !== undefined) {
+        var room = this.reader.roomIndex[roomId];
+
+        if (room === undefined) {
+          throw new Error("Room ".concat(roomId, " not found."));
+        }
+
+        bounds = new paper.Rectangle(this.getRealPoint(new paper.Point(room.x, room.y)).subtract(padding * this.scale), padding * 2 * this.scale, padding * 2 * this.scale);
+      }
+
+      return this.paper.project.exportSVG({
+        asString: true,
+        bounds: bounds
+      });
     }
   }]);
 
@@ -1751,8 +1788,14 @@ var MapReader = /*#__PURE__*/function () {
         }
 
         return isWithinBounds;
-      }), area.labels.filter(function (value) {
-        return value.Z === zIndex;
+      }), area.labels.filter(function (label) {
+        var isWithinBounds = true;
+
+        if (limits) {
+          isWithinBounds = limits.xMin < label.X && limits.xMax > label.X && limits.yMin < label.Y && limits.yMax > label.Y;
+        }
+
+        return isWithinBounds;
       }), zIndex, levels);
 
       if (!levels.has(zIndex)) {

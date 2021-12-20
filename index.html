@@ -108,6 +108,12 @@
                                 Jednakowa wielkość poziomów strefy
                             </label>
                         </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="keepZoomLevel" value="1" id="keepZoomLevel">
+                            <label class="form-check-label" for="keepZoomLevel">
+                                Zachowuj poziom przybliżenia
+                            </label>
+                        </div>
                     </div>
                     <div class="form-group">
                         <div class="form-check">
@@ -141,7 +147,10 @@
                             </label>
                         </div>
                     </div>
-
+                    <div class="form-group">
+                        <label for="map-background" class="form-label">Tło mapy</label>
+                        <input type="color" class="form-control form-control-color" id="mapBackground" name="mapBackground" value="#000000" title="Wybierz kolor tła">
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Zapisz</button>
