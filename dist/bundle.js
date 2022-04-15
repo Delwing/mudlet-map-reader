@@ -1,6 +1,8 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
+var _mudletMapRenderer = require("mudlet-map-renderer");
+
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
@@ -11,13 +13,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Renderer = require("./map-fragment/draw/renderer").Renderer;
-
-var Settings = require("./map-fragment/draw/renderer").Settings;
-
-var MapReader = require("./map-fragment/reader/MapReader").MapReader;
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
 
 var urlSearchParams = new URLSearchParams(window.location.search);
 var params = Object.fromEntries(urlSearchParams.entries());
@@ -55,8 +51,8 @@ var PageControls = /*#__PURE__*/function () {
     });
     this.map.on("goToArea", function (event) {
       return setTimeout(function () {
-        return _this.renderArea(event.detail.areaId, event.detail.z);
-      }, 0.1);
+        return _this.findRoom(event.detail.id);
+      });
     });
     this.reader = reader;
     this.select = jQuery("#area");
@@ -72,7 +68,7 @@ var PageControls = /*#__PURE__*/function () {
     this.zoomBar = jQuery(".progress-container");
     this.settingsModal = jQuery("#settings");
     this.settingsForm = jQuery("#settings form");
-    this.settings = new Settings();
+    this.settings = new _mudletMapRenderer.Settings();
     this.zIndex = 0;
     var loaded = localStorage.getItem("settings");
 
@@ -171,7 +167,7 @@ var PageControls = /*#__PURE__*/function () {
       }
 
       this.hideRoomInfo();
-      this.renderer = new Renderer(document.getElementById("map"), this.reader, area, this.reader.getColors(), this.settings);
+      this.renderer = new _mudletMapRenderer.Renderer(document.getElementById("map"), this.reader, area, this.reader.getColors(), this.settings);
       this.select.val(areaId);
       this.populateLevelButtons(area.getLevels(), zIndex);
       this.zIndex = zIndex;
@@ -286,7 +282,7 @@ var PageControls = /*#__PURE__*/function () {
 
       if (area !== undefined) {
         this.renderArea(area.areaId, area.zIndex);
-        this.renderer.controls.setZoom(10);
+        this.renderer.controls.setZoom(1);
         this.renderer.controls.centerRoom(id);
       } else {
         this.showToast("Nie znaleziono takiej lokacji");
@@ -352,8 +348,6 @@ var PageControls = /*#__PURE__*/function () {
         show = true;
         containerList.append("<li>" + userDataKey + ":<br>&nbsp; &nbsp; &nbsp;" + userData[userDataKey] + "</li>");
       }
-
-      container.toggle(show);
     }
   }, {
     key: "infoExitsGroup",
@@ -556,7 +550,7 @@ var PageControls = /*#__PURE__*/function () {
   return PageControls;
 }();
 
-var controls = new PageControls(new MapReader(mapData, colors));
+var controls = new PageControls(new _mudletMapRenderer.MapReader(mapData, colors));
 controls.genericSetup();
 controls.populateSelectBox();
 var area;
@@ -597,1249 +591,7 @@ function dirsShortToLong(dir) {
   return result !== undefined ? result : dir;
 }
 
-},{"./map-fragment/draw/renderer":3,"./map-fragment/reader/MapReader":5}],2:[function(require,module,exports){
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var paper = require("paper");
-
-var selectionStyle = function selectionStyle(item) {
-  var style = {
-    strokeColor: new paper.Color(180 / 255, 93 / 255, 60 / 255, 0.9)
-  };
-
-  if (item.closed) {
-    style.fillColor = new paper.Color(new paper.Gradient([[item.fillColor, 0.38], new paper.Color(1, 1, 1)], false), item.bounds.topCenter, item.bounds.bottomCenter);
-  }
-
-  return style;
-};
-
-paper.Item.prototype.select = function (styleFunction) {
-  this.mapSelected = !this.mapSelected;
-
-  if (this.mapSelected && styleFunction !== undefined) {
-    var style = styleFunction(this);
-    this.orgStyle = {};
-
-    for (var key in style) {
-      this.orgStyle[key] = this[key];
-    }
-
-    this.style = style;
-  } else {
-    this.style = this.orgStyle;
-  }
-};
-
-var Controls = /*#__PURE__*/function () {
-  function Controls(renderer, reader, element, paperScope) {
-    var _this = this;
-
-    _classCallCheck(this, Controls);
-
-    this.renderer = renderer;
-    this.reader = reader;
-    this.element = element;
-    this.scope = paperScope;
-    this.view = paperScope.view;
-
-    this.element.onwheel = function (event) {
-      return _this.zoom(event);
-    };
-
-    this.activateDrag();
-    this.renderer.emitter.addEventListener("roomClick", function (event) {
-      return _this.selectRoom(event.detail);
-    });
-    this.renderer.emitter.addEventListener("backgroundClick", function () {
-      return _this.deselectRoom();
-    });
-    this.renderer.emitter.addEventListener("areaArrowClick", function (event) {
-      return _this.goToRoomArea(event.detail);
-    });
-    var bounds = this.renderer.getBounds();
-    this.view.center = bounds.center;
-    this.view.zoom = Math.min(this.view.size.width / bounds.width, this.view.size.height / bounds.height);
-    this.view.minZoom = this.view.zoom;
-  }
-
-  _createClass(Controls, [{
-    key: "zoom",
-    value: function zoom(event) {
-      event.preventDefault();
-      var oldZoom = this.view.zoom;
-      this.deltaZoom(event.deltaY > 0 ? 0.9 : 1.1);
-      var viewPos = this.view.viewToProject(new paper.Point(event.offsetX, event.offsetY));
-      var zoomScale = oldZoom / this.view.zoom;
-      var centerAdjust = viewPos.subtract(this.view.center);
-      var offset = viewPos.subtract(centerAdjust.multiply(zoomScale)).subtract(this.view.center);
-      this.view.center = this.view.center.add(offset);
-    }
-  }, {
-    key: "setZoom",
-    value: function setZoom(value) {
-      this.view.zoom = value;
-      this.view.zoom = Math.min(Math.max(this.view.zoom, this.view.minZoom), 50);
-      this.element.dispatchEvent(new CustomEvent("zoom", {
-        detail: this.view
-      }));
-    }
-  }, {
-    key: "deltaZoom",
-    value: function deltaZoom(delta) {
-      this.setZoom(this.view.zoom * delta);
-    }
-  }, {
-    key: "activateDrag",
-    value: function activateDrag() {
-      var _this2 = this;
-
-      var toolPan = new paper.Tool();
-      toolPan.activate();
-
-      toolPan.onMouseDrag = function (event) {
-        _this2.element.style.cursor = "all-scroll";
-
-        var bounds = _this2.renderer.getBounds();
-
-        var viewBounds = _this2.view.getBounds();
-
-        if (viewBounds.x < bounds.x) {
-          _this2.view.translate(delta);
-        }
-
-        var delta = event.downPoint.subtract(event.point);
-
-        _this2.view.translate(delta.negate());
-
-        _this2.isDrag = true;
-      };
-
-      toolPan.onMouseDown = function () {
-        _this2.isDrag = false;
-      };
-
-      toolPan.onMouseUp = function () {
-        _this2.isDrag = false;
-        _this2.element.style.cursor = "default";
-      };
-    }
-  }, {
-    key: "selectRoom",
-    value: function selectRoom(room) {
-      if (this.isDrag) {
-        return false;
-      }
-
-      this.deselectRoom();
-      this.renderer.renderPosition(room.id);
-      room.render.select(selectionStyle);
-      room.exitsRenders.forEach(function (render) {
-        return render.select(selectionStyle);
-      });
-      this.selected = room;
-      this.element.dispatchEvent(new CustomEvent("roomSelected", {
-        detail: room
-      }));
-    }
-  }, {
-    key: "deselectRoom",
-    value: function deselectRoom() {
-      if (this.isDrag) {
-        return false;
-      }
-
-      this.renderer.clearPosition();
-
-      if (this.selected !== undefined) {
-        this.selected.render.select();
-        this.selected.exitsRenders.forEach(function (render) {
-          return render.select();
-        });
-        delete this.selected;
-        this.element.dispatchEvent(new CustomEvent("roomDeselected"));
-      }
-    }
-  }, {
-    key: "centerRoom",
-    value: function centerRoom(id) {
-      var room = this.renderer.area.getRoomById(id);
-
-      if (room !== undefined) {
-        this.view.center = room.render.localToGlobal(room.render.position);
-        this.selectRoom(room);
-      }
-    }
-  }, {
-    key: "goToRoomArea",
-    value: function goToRoomArea(id) {
-      var destRoom = this.reader.getRoomById(id);
-      this.element.dispatchEvent(new CustomEvent("goToArea", {
-        detail: destRoom
-      }));
-    }
-  }, {
-    key: "move",
-    value: function move(x, y) {
-      this.view.scrollBy(new paper.Point(x * 50, y * 50));
-    }
-  }]);
-
-  return Controls;
-}();
-
-module.exports = {
-  Controls: Controls
-};
-
-},{"paper":8}],3:[function(require,module,exports){
-"use strict";
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var paper = require("paper");
-
-var MapReader = require("../reader/MapReader").MapReader;
-
-var Controls = require("./controls").Controls;
-
-var padding = 7;
-var gridSize = 20;
-
-var Colors = function Colors() {
-  _classCallCheck(this, Colors);
-};
-
-_defineProperty(Colors, "OPEN_DOOR", new paper.Color(10 / 255, 155 / 255, 10 / 255));
-
-_defineProperty(Colors, "CLOSED_DOOR", new paper.Color(226 / 255, 205 / 255, 59 / 255));
-
-_defineProperty(Colors, "LOCKED_DOOR", new paper.Color(155 / 255, 10 / 255, 10 / 255));
-
-var Settings = function Settings() {
-  _classCallCheck(this, Settings);
-
-  _defineProperty(this, "isRound", false);
-
-  _defineProperty(this, "scale", 55);
-
-  _defineProperty(this, "roomSize", 10);
-
-  _defineProperty(this, "exitsSize", 2);
-
-  _defineProperty(this, "borders", false);
-
-  _defineProperty(this, "frameMode", false);
-
-  _defineProperty(this, "areaName", true);
-
-  _defineProperty(this, "showLabels", true);
-
-  _defineProperty(this, "uniformLevelSize", false);
-
-  _defineProperty(this, "fontFamily", 'sans-serif');
-
-  _defineProperty(this, "mapBackground", "#000000");
-};
-
-paper.Item.prototype.registerClick = function (callback) {
-  if (typeof document !== "undefined") {
-    this.onClick = callback;
-  }
-};
-
-paper.Item.prototype.pointerReactor = function (element) {
-  if (typeof document !== "undefined") {
-    this.onMouseEnter = function () {
-      return element.style.cursor = "pointer";
-    };
-
-    this.onMouseLeave = function () {
-      return element.style.cursor = "default";
-    };
-  }
-};
-
-var Renderer = /*#__PURE__*/function () {
-  /**
-   *
-   * @param {HTMLElement} element
-   * @param {MapReader} reader
-   * @param {*} area
-   * @param {*} colors
-   * @param {Settings} settings
-   */
-  function Renderer(element, reader, area, colors, settings) {
-    _classCallCheck(this, Renderer);
-
-    this.settings = new Settings();
-    Object.assign(this.settings, settings);
-    this.reader = reader;
-    this.area = area;
-    this.colors = colors;
-    this.scale = this.settings.scale;
-    this.grideSize = this.settings.gridSize;
-    this.roomSize = this.settings.roomSize;
-    this.roomFactor = this.roomSize / gridSize;
-    this.exitFactor = this.settings.exitsSize * 0.01;
-    this.roomDiagonal = this.roomFactor * Math.sqrt(2);
-    this.innerExits = ["up", "down", "u", "d", "in", "out", "i", "u"];
-    this.paper = new paper.PaperScope();
-    this.bounds = this.area.getAreaBounds(this.settings.uniformLevelSize);
-
-    if (element == undefined) {
-      element = new paper.Size((this.bounds.width + padding * 2) * this.scale, (this.bounds.height + padding * 2) * this.scale);
-      this.isVisual = false;
-    } else {
-      this.isVisual = true;
-      this.emitter = new EventTarget();
-    }
-
-    this.paper.setup(element);
-    this.element = element;
-    this.backgroundLayer = new paper.Layer();
-    this.bgLabels = new paper.Layer();
-    this.linkLayer = new paper.Layer();
-    this.roomLayer = new paper.Layer();
-    this.labelsLayer = new paper.Layer();
-    this.specialLinkLayer = new paper.Layer();
-    this.charsLayer = new paper.Layer();
-    this.overlayLayer = new paper.Layer();
-    this.exitsRendered = {};
-    this.defualtColor = new paper.Color(this.colors["default"][0] / 255, this.colors["default"][1] / 255, this.colors["default"][2] / 255);
-    this.render();
-  }
-
-  _createClass(Renderer, [{
-    key: "render",
-    value: function render() {
-      var _this = this;
-
-      var pngRender = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      this.pngRender = pngRender;
-      this.renderBackground(this.bounds.minX - padding, this.bounds.minY - padding, this.bounds.maxX + padding, this.bounds.maxY + padding);
-      this.renderHeader(this.bounds.minX - padding / 2, this.bounds.maxY + padding / 2);
-      this.area.rooms.filter(function (room) {
-        return room.z == _this.area.zIndex;
-      }).forEach(function (room) {
-        _this.renderRoom(room);
-      });
-
-      if (this.area.labels !== undefined && this.settings.showLabels) {
-        this.bgLabels.activate();
-        this.area.labels.filter(function (label) {
-          return label.Z == _this.area.zIndex;
-        }).forEach(function (value) {
-          return _this.renderLabel(value);
-        }, this);
-      }
-
-      this.matrix = new paper.Matrix(1, 0, 0, -1, -this.bounds.minX + padding, this.bounds.maxY + padding).scale(this.scale, new paper.Point(this.bounds.minX, this.bounds.maxY));
-      this.transform();
-
-      if (this.isVisual) {
-        this.controls = new Controls(this, this.reader, this.element, this.paper);
-      }
-    }
-  }, {
-    key: "transform",
-    value: function transform() {
-      var _this2 = this;
-
-      var padding = 1 * this.scale;
-      this.paper.project.layers.forEach(function (layer) {
-        layer.applyMatrix = false;
-        layer.matrix = new paper.Matrix(1, 0, 0, -1, -_this2.bounds.minX + padding, _this2.bounds.maxY + padding).scale(_this2.scale, new paper.Point(_this2.bounds.minX, _this2.bounds.maxY));
-      });
-    }
-  }, {
-    key: "renderBackground",
-    value: function renderBackground(x1, y1, x2, y2) {
-      var _this3 = this;
-
-      this.backgroundLayer.activate();
-      var background = new paper.Path.Rectangle(new paper.Point(x1, y1), new paper.Point(x2, y2));
-      background.fillColor = new paper.Color(this.settings.mapBackground);
-      background.registerClick(function () {
-        _this3.emitter.dispatchEvent(new CustomEvent("backgroundClick"));
-      });
-    }
-  }, {
-    key: "renderHeader",
-    value: function renderHeader(x, y) {
-      if (this.settings.areaName) {
-        this.backgroundLayer.activate();
-        var header = new paper.PointText(x, y);
-        header.fillColor = new paper.Color(1, 1, 1, 1);
-        header.fontSize = 2.5;
-        header.fontFamily = this.settings.fontFamily;
-        header.content = this.area.areaName;
-        header.scale(1, -1);
-      }
-    }
-  }, {
-    key: "renderRoom",
-    value: function renderRoom(room) {
-      var _this4 = this;
-
-      this.roomLayer.activate();
-      var roomShape;
-
-      if (!this.settings.isRound) {
-        roomShape = new paper.Path.Rectangle(new paper.Point(room.x, room.y), new paper.Size(this.roomFactor, this.roomFactor));
-      } else {
-        roomShape = new paper.Path.Circle(new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2), this.roomFactor / 2);
-      }
-
-      var color = this.colors[room.env];
-
-      if (color === undefined) {
-        color = [114, 1, 0];
-      }
-
-      var roomColor = new paper.Color(color[0] / 255, color[1] / 255, color[2] / 255, 1);
-      roomShape.fillColor = !this.settings.frameMode ? roomColor : new paper.Color(0, 0, 0);
-      roomShape.strokeWidth = this.exitFactor;
-      roomShape.strokeColor = !this.settings.borders || this.settings.frameMode ? roomColor : this.defualtColor;
-      room.render = roomShape;
-      room.exitsRenders = room.exitsRenders != undefined ? room.exitsRenders : [];
-
-      for (var dir in room.exits) {
-        if (this.innerExits.indexOf(dir) <= -1) {
-          if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
-            this.renderLink(room, room.exits[dir], dir);
-          }
-        } else {
-          this.renderInnerExit(room, dir);
-        }
-      }
-
-      for (var _dir in room.specialExits) {
-        if (room.specialExits.hasOwnProperty(_dir) && !room.customLines.hasOwnProperty(_dir)) {
-          this.renderSpecialLink(room, _dir, room.specialExits[_dir]);
-        }
-      }
-
-      for (var _dir2 in room.customLines) {
-        this.renderCustomLine(room, _dir2);
-      }
-
-      for (var _dir3 in room.stubs) {
-        this.renderStub(room, dirNumbers[room.stubs[_dir3]]);
-      }
-
-      this.renderChar(room);
-      roomShape.pointerReactor(this.element);
-      roomShape.registerClick(function () {
-        _this4.emitter.dispatchEvent(new CustomEvent("roomClick", {
-          detail: room
-        }));
-      });
-    }
-  }, {
-    key: "renderLink",
-    value: function renderLink(room, targetId, dir) {
-      var _this5 = this;
-
-      var exitKey = new Array(room.id, targetId).sort().join("#");
-
-      if (this.exitsRendered[exitKey] && room.doors[dirLongToShort(dir)] === undefined) {
-        return;
-      }
-
-      this.linkLayer.activate();
-      var targetRoom = this.area.getRoomById(targetId);
-      var exitPoint = new paper.Point(this.getExitX(room.x, dir), this.getExitY(room.y, dir));
-      var path = new paper.Path();
-      var secondPoint;
-
-      if (targetRoom) {
-        var connectedDir = getKeyByValue(targetRoom.exits, room.id);
-        var isOneWay = connectedDir == undefined;
-        secondPoint = new paper.Point(this.getExitX(targetRoom.x, connectedDir), this.getExitY(targetRoom.y, connectedDir));
-
-        if (!isOneWay) {
-          path.moveTo(exitPoint);
-          path.lineTo(secondPoint);
-          path.strokeWidth = this.exitFactor;
-          path.strokeColor = this.defualtColor;
-        } else {
-          this.renderArrow(exitPoint, secondPoint, this.defualtColor, [], this.exitFactor, this.defualtColor, true);
-        }
-      } else {
-        secondPoint = new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2);
-        var color = this.colors[this.reader.getRoomById(targetId).env];
-
-        if (color === undefined) {
-          color = [114, 1, 0];
-        }
-
-        path = this.renderArrow(exitPoint, secondPoint, new paper.Color(color[0] / 255, color[1] / 255, color[2] / 255), [], this.exitFactor);
-        path.rotate(180, exitPoint);
-        path.scale(2);
-        path.pointerReactor(this.element);
-        path.registerClick(function () {
-          return _this5.emitter.dispatchEvent(new CustomEvent("areaArrowClick", {
-            detail: targetId
-          }));
-        });
-      }
-
-      if (room.doors[dirLongToShort(dir)] !== undefined) {
-        this.renderDoors(exitPoint, secondPoint, room.doors[dirLongToShort(dir)]);
-      }
-
-      this.exitsRendered[exitKey] = true;
-      room.exitsRenders.push(path);
-
-      if (targetRoom) {
-        targetRoom.exitsRenders = targetRoom.exitsRenders != undefined ? targetRoom.exitsRenders : [];
-        targetRoom.exitsRenders.push(path);
-      }
-
-      return path;
-    }
-  }, {
-    key: "renderSpecialLink",
-    value: function renderSpecialLink(room, targetId, dir) {
-      this.linkLayer.activate();
-      var path;
-      var exitPoint = new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2);
-      var targetRoom = this.area.getRoomById(targetId);
-      var secondPoint;
-
-      if (targetRoom) {
-        path = new paper.Path();
-        path.moveTo(exitPoint);
-        var connectedDir = getKeyByValue(targetRoom.exits, room.id);
-        secondPoint = new paper.Point(this.getExitX(targetRoom.x, connectedDir), this.getExitY(targetRoom.y, connectedDir));
-        path.lineTo(secondPoint);
-        path.strokeWidth = 1;
-      } else {
-        secondPoint = new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2);
-        path = this.renderArrow(exitPoint, secondPoint, this.defualtColor, [], this.exitFactor);
-        path.strokeColor = this.defualtColor;
-        path.scale(1, exitPoint);
-        path.rotate(180, exitPoint);
-      }
-
-      room.exitsRenders.push(path);
-
-      if (targetRoom) {
-        targetRoom.exitsRenders = targetRoom.exitsRenders != "undefined" ? targetRoom.exitsRenders : [];
-        targetRoom.exitsRenders.push(path);
-      }
-
-      return path;
-    }
-  }, {
-    key: "renderCustomLine",
-    value: function renderCustomLine(room, dir) {
-      if (room.customLines[dir].points !== undefined && room.customLines[dir].points.length === 0) {
-        return;
-      }
-
-      this.linkLayer.activate();
-      var customLine = new paper.Group();
-      var path = new paper.Path();
-      var style = room.customLines[dir].attributes.style;
-
-      if (style === "dot line") {
-        path.dashArray = [0.05, 0.05];
-        path.dashOffset = 0.1;
-      } else if (style === "dash line") {
-        path.dashArray = [0.4, 0.2];
-      } else if (style === "solid line") {} else {
-        console.log("Brak opisu stylu: " + style);
-      }
-
-      if (room.customLines[dir].attributes.color !== undefined) {
-        var color = room.customLines[dir].attributes.color;
-        path.strokeColor = new paper.Color(color.r / 255, color.g / 255, color.b / 255);
-      } else {
-        path.strokeColor = this.defualtColor;
-      }
-
-      var lastPoint = new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2);
-      path.moveTo(lastPoint);
-
-      if (room.customLines[dir].points !== undefined) {
-        var points = [];
-        room.customLines[dir].points.forEach(function (value) {
-          return points.push(value);
-        });
-
-        for (var point in points) {
-          var customPoint = points[point];
-          var pointCoords = new paper.Point(customPoint.x + this.roomFactor / 2, customPoint.y + this.roomFactor / 2);
-          lastPoint = new paper.Point(pointCoords);
-          path.lineTo(lastPoint);
-        }
-      }
-
-      customLine.addChild(path);
-
-      if (room.customLines[dir].attributes.arrow && path.segments.length > 1) {
-        var arrow = this.renderArrow(path.segments[path.segments.length - 2].point, path.segments[path.segments.length - 1].point, path.strokeColor, path.dashArray, this.exitFactor);
-        customLine.addChild(arrow);
-      }
-
-      path.strokeWidth = this.exitFactor;
-      path.orgStrokeColor = path.strokeColor;
-      room.exitsRenders.push(customLine);
-      return customLine;
-    }
-  }, {
-    key: "renderArrow",
-    value: function renderArrow(lineStart, lineEnd, color, dashArray, strokeWidth, strokeColor, isOneWay) {
-      var arrowPoint = lineEnd;
-      var arrow = new paper.Path.RegularPolygon(arrowPoint, 3, this.roomDiagonal / 6);
-      arrow.position = arrow.position.add(arrow.bounds.topCenter.subtract(arrow.bounds.center));
-      arrow.rotate(lineEnd.subtract(lineStart).getAngle() + 90, lineEnd);
-      var tailLine = new paper.Path.Line(lineStart, arrow.bounds.center);
-      var path = new paper.Group([tailLine, arrow]);
-      path.closed = true;
-      arrow.fillColor = color;
-      arrow.strokeColor = color;
-      arrow.strokeWidth = this.exitFactor;
-      tailLine.fillColor = strokeColor ? strokeColor : color;
-      tailLine.strokeColor = strokeColor ? strokeColor : color;
-      tailLine.dashArray = dashArray;
-      tailLine.strokeWidth = this.exitFactor;
-
-      if (isOneWay) {
-        arrow.position = new paper.Point(lineEnd.x + (lineStart.x - lineEnd.x) / 2, lineEnd.y + (lineStart.y - lineEnd.y) / 2);
-        tailLine.dashArray = [0.1, 0.1];
-        path.fillColor = new paper.Color(1, 0, 0);
-        arrow.scale(1.5);
-      } else {
-        tailLine.strokeWidth = strokeWidth;
-      }
-
-      return path;
-    }
-  }, {
-    key: "renderStub",
-    value: function renderStub(room, dir) {
-      this.linkLayer.activate();
-      var path;
-
-      if (this.innerExits.indexOf(dir) > -1) {
-        path = this.renderInnerExit(room, dir, true);
-      } else {
-        var startPoint = new paper.Point(room.x + this.roomFactor * 0.5, room.y + this.roomFactor * 0.5);
-        var exitPoint = new paper.Point(this.getExitX(room.x, dir), this.getExitY(room.y, dir));
-        path = new paper.Path();
-        path.moveTo(startPoint);
-        path.lineTo(exitPoint);
-        path.pivot = startPoint;
-        path.scale(2);
-        path.position = exitPoint;
-        path.strokeWidth = this.exitFactor;
-        path.strokeColor = this.defualtColor;
-      }
-
-      return path;
-    }
-  }, {
-    key: "renderInnerExit",
-    value: function renderInnerExit(room, direction) {
-      var stub = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      this.labelsLayer.activate();
-      var group = new paper.Group();
-
-      if (direction === "down" || direction == "d") {
-        group.addChild(this.renderInnerTriangle(room, direction, stub));
-      }
-
-      if (direction === "up" || direction === "u") {
-        group.addChild(this.renderInnerTriangle(room, direction, stub));
-        group.rotate(180, room.render.bounds.center);
-      }
-
-      if (direction === "in" || direction === "i") {
-        var left = this.renderInnerTriangle(room, direction, stub);
-        left.rotate(90, room.render.bounds.center);
-        left.scale(0.4, room.render.bounds.center);
-        left.position.x -= 0.01;
-        var right = this.renderInnerTriangle(room, direction, stub);
-        right.scale(0.4, room.render.bounds.center);
-        right.rotate(270, room.render.bounds.center);
-        right.position.x += 0.01;
-        group.addChild(left);
-        group.addChild(right);
-      }
-
-      if (direction === "out" || direction === "o") {
-        var _left = this.renderInnerTriangle(room, direction, stub);
-
-        _left.rotate(270, room.render.bounds.center);
-
-        _left.scale(0.5, room.render.bounds.rightCenter);
-
-        _left.rotate(180);
-
-        _left.position.x -= 0.01;
-
-        var _right = this.renderInnerTriangle(room, direction, stub);
-
-        _right.rotate(90, room.render.bounds.center);
-
-        _right.scale(0.5, room.render.bounds.leftCenter);
-
-        _right.rotate(180);
-
-        _right.position.x += 0.01;
-        group.addChild(_left);
-        group.addChild(_right);
-      }
-
-      if (this.settings.isRound) {
-        group.scale(0.8, 0.8, new paper.Point(room.render.bounds.center));
-      }
-
-      group.locked = true;
-      return group;
-    }
-  }, {
-    key: "renderInnerTriangle",
-    value: function renderInnerTriangle(room, direction, stub) {
-      var triangle = new paper.Path.RegularPolygon(new paper.Point(room.render.bounds.bottomCenter).subtract(new paper.Point(0, 0.2 * this.roomFactor)), 3, 0.3 * this.roomFactor);
-      triangle.scale(1.2, 0.75);
-      var baseColor = this.lightnessDependantColor(room);
-      triangle.strokeWidth = this.exitFactor;
-
-      if (!stub) {
-        triangle.fillColor = new paper.Color(baseColor, baseColor, baseColor, 0.75);
-      }
-
-      triangle.strokeColor = new paper.Color(baseColor, baseColor, baseColor);
-      var doorType = room.doors[dirsShortToLong(direction)];
-
-      if (doorType !== undefined) {
-        switch (doorType) {
-          case 1:
-            triangle.strokeColor = Colors.OPEN_DOOR;
-            break;
-
-          case 2:
-            triangle.strokeColor = Colors.CLOSED_DOOR;
-            break;
-
-          default:
-            triangle.strokeColor = Colors.LOCKED_DOOR;
-        }
-      }
-
-      triangle.bringToFront();
-      return triangle;
-    }
-  }, {
-    key: "renderChar",
-    value: function renderChar(room) {
-      this.charsLayer.activate();
-
-      if (room.roomChar) {
-        var size = 0.85 * this.roomFactor / room.roomChar.length;
-        var x = this.pngRender ? room.render.position.x - 0.1 : room.render.position.x;
-        var text = new paper.PointText(x, room.render.position.y + size / 4);
-
-        if (!room.userData || room.userData["system.fallback_symbol_color"] === undefined) {
-          text.fillColor = this.lightnessDependantColor(room);
-        } else {
-          text.fillColor = room.userData["system.fallback_symbol_color"];
-        }
-
-        text.fontSize = size;
-        text.content = room.roomChar;
-        text.justification = "center";
-        text.locked = true;
-        text.scale(1, -1);
-      }
-    }
-  }, {
-    key: "renderDoors",
-    value: function renderDoors(firstPoint, secondPoint, type) {
-      this.specialLinkLayer.activate();
-      var x = (firstPoint.x + secondPoint.x) / 2;
-      var y = (firstPoint.y + secondPoint.y) / 2;
-      var door = new paper.Path.Rectangle(x - 0.5, y - 0.5, 1, 1);
-      door.scale(this.roomFactor * 0.5, door.center);
-
-      switch (type) {
-        case 1:
-          door.strokeColor = Colors.OPEN_DOOR;
-          break;
-
-        case 2:
-          door.strokeColor = Colors.CLOSED_DOOR;
-          break;
-
-        default:
-          door.strokeColor = Colors.LOCKED_DOOR;
-      }
-
-      door.strokeWidth = this.exitFactor;
-    }
-  }, {
-    key: "renderLabel",
-    value: function renderLabel(value) {
-      if (false && value.pixMap) {
-        //TODO Not really sure how to deal with pixMap labels here so they are ok both in .svg and browser
-        var label = new paper.Raster("data:image/png;base64," + value.pixMap);
-        label._size.width = value.Width;
-        label._size.height = value.Height;
-        label.position = new paper.Point(value.X + value.Width / 2, value.Y);
-        label.scale(this.roomFactor * 0.08, -this.roomFactor * 0.08);
-      } else {
-        var background = new paper.Path.Rectangle(new paper.Point(value.X, value.Y - value.Height), new paper.Size(value.Width, value.Height));
-        background.fillColor = new paper.Color(value.BgColor.r / 255, value.BgColor.g / 255, value.BgColor.b / 255);
-        var text = new paper.PointText(background.bounds.center.add(0, 0.15));
-        text.fillColor = new paper.Color(value.FgColor.r / 255, value.FgColor.g / 255, value.FgColor.b / 255);
-        text.fontSize = 0.75;
-        text.content = value.Text;
-        text.fontFamily = this.settings.fontFamily;
-        text.justification = "center";
-        text.locked = true;
-        text.scale(1, -1);
-      }
-    }
-  }, {
-    key: "lightnessDependantColor",
-    value: function lightnessDependantColor(room) {
-      if (room.render.fillColor.lightness > 0.41) {
-        return 0.1;
-      } else {
-        return 0.9;
-      }
-    }
-  }, {
-    key: "getXMid",
-    value: function getXMid(x) {
-      return x + this.roomFactor / 2;
-    }
-  }, {
-    key: "getYMid",
-    value: function getYMid(y) {
-      return y + this.roomFactor / 2;
-    }
-  }, {
-    key: "getExitX",
-    value: function getExitX(x, dir) {
-      if (this.settings.isRound) {
-        return x + 0.5 * this.roomFactor;
-      }
-
-      switch (dir) {
-        case "west":
-        case "w":
-        case "northwest":
-        case "nw":
-        case "southwest":
-        case "sw":
-          return x;
-
-        case "east":
-        case "e":
-        case "northeast":
-        case "ne":
-        case "southeast":
-        case "se":
-          return x + this.roomFactor;
-
-        default:
-          return x + 0.5 * this.roomFactor;
-      }
-    }
-  }, {
-    key: "getExitY",
-    value: function getExitY(y, dir) {
-      if (this.settings.isRound) {
-        return y + 0.5 * this.roomFactor;
-      }
-
-      switch (dir) {
-        case "north":
-        case "n":
-        case "northwest":
-        case "nw":
-        case "northeast":
-        case "ne":
-          return y + this.roomFactor;
-
-        case "south":
-        case "s":
-        case "southwest":
-        case "sw":
-        case "southeast":
-        case "se":
-          return y;
-
-        default:
-          return y + 0.5 * this.roomFactor;
-      }
-    }
-  }, {
-    key: "getRealPoint",
-    value: function getRealPoint(x, y) {
-      return this.matrix.transform(new paper.Point(x, y));
-    }
-  }, {
-    key: "getBounds",
-    value: function getBounds() {
-      return this.backgroundLayer.getBounds();
-    }
-  }, {
-    key: "renderPosition",
-    value: function renderPosition(id, color) {
-      this.clearPosition();
-      this.overlayLayer.activate();
-      var room = this.area.getRoomById(id);
-      var circle = new paper.Shape.Circle(new paper.Point(room.x + this.roomFactor * 0.5, room.y + this.roomFactor * 0.5), this.roomDiagonal * 0.6);
-      circle.fillColor = new paper.Color(0.5, 0.1, 0.1, 0.2);
-      circle.strokeWidth = this.exitFactor * 5;
-      circle.hadowColor = new paper.Color(1, 1, 1);
-      circle.shadowBlur = 12;
-
-      if (color === undefined) {
-        color = [0, 0.9, 0.7];
-      }
-
-      circle.strokeColor = new paper.Color(color[0], color[1], color[2]);
-      circle.dashArray = [0.05, 0.05];
-      this.position = circle;
-    }
-  }, {
-    key: "clearPosition",
-    value: function clearPosition() {
-      if (this.position !== undefined) {
-        this.position.remove();
-      }
-    }
-  }, {
-    key: "renderSelection",
-    value: function renderSelection(id, color) {
-      this.clearSelection();
-      this.overlayLayer.activate();
-      var room = this.area.getRoomById(id);
-      var selection = new paper.Path.Rectangle(new paper.Point(room.x - 0.05, room.y - 0.05), new paper.Size(this.roomFactor + 0.1, this.roomFactor + 0.1));
-      selection.fillColor = new paper.Color(1, 1, 1, 0);
-      selection.strokeWidth = this.exitFactor;
-
-      if (color === undefined) {
-        color = [0, 0.9, 0.7];
-      }
-
-      selection.strokeColor = new paper.Color(color[0], color[1], color[2]);
-      this.selection = selection;
-    }
-  }, {
-    key: "clearSelection",
-    value: function clearSelection() {
-      if (this.selection !== undefined) {
-        this.selection.remove();
-      }
-    }
-  }, {
-    key: "clear",
-    value: function clear() {
-      this.paper.clear();
-    }
-  }, {
-    key: "exportSvg",
-    value: function exportSvg(roomId, padding) {
-      var bounds = 'content';
-
-      if (roomId !== undefined) {
-        var room = this.reader.roomIndex[roomId];
-
-        if (room === undefined) {
-          throw new Error("Room ".concat(roomId, " not found."));
-        }
-
-        bounds = new paper.Rectangle(this.getRealPoint(new paper.Point(room.x, room.y)).subtract(padding * this.scale), padding * 2 * this.scale, padding * 2 * this.scale);
-      }
-
-      return this.paper.project.exportSVG({
-        asString: true,
-        bounds: bounds
-      });
-    }
-  }]);
-
-  return Renderer;
-}();
-
-module.exports = {
-  Renderer: Renderer,
-  Settings: Settings
-};
-
-function getKeyByValue(obj, val) {
-  for (var k in obj) {
-    if (obj.hasOwnProperty(k) && obj[k] === val) {
-      return k;
-    }
-  }
-}
-
-var dirs = {
-  north: "n",
-  south: "s",
-  east: "e",
-  west: "w",
-  northeast: "ne",
-  northwest: "nw",
-  southeast: "se",
-  southwest: "sw",
-  up: "u",
-  down: "d",
-  "in": "i",
-  out: "o"
-};
-var dirNumbers = {
-  1: "n",
-  2: "ne",
-  3: "nw",
-  4: "e",
-  5: "w",
-  6: "s",
-  7: "se",
-  8: "sw",
-  9: "u",
-  10: "d",
-  11: "i",
-  12: "o"
-};
-
-function dirsShortToLong(dir) {
-  var result = getKeyByValue(dirs, dir);
-  return result !== undefined ? result : dir;
-}
-
-function dirLongToShort(dir) {
-  return dirs[dir] !== undefined ? dirs[dir] : dir;
-}
-
-},{"../reader/MapReader":5,"./controls":2,"paper":8}],4:[function(require,module,exports){
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Area = /*#__PURE__*/function () {
-  function Area(areaId, areaName, rooms, labels, zIndex, levels) {
-    _classCallCheck(this, Area);
-
-    this.areaId = parseInt(areaId);
-    this.areaName = areaName;
-    this.rooms = [];
-    this.labels = labels;
-    var that = this;
-    rooms.forEach(function (element) {
-      that.rooms[element.id] = element;
-    });
-    this.levels = levels;
-    this.zIndex = zIndex;
-  }
-
-  _createClass(Area, [{
-    key: "getAreaBounds",
-    value: function getAreaBounds() {
-      var _this = this;
-
-      var full = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-
-      if (this.bounds === undefined) {
-        var minX = 9999999999;
-        var minY = 9999999999;
-        var maxX = -9999999999;
-        var maxY = -9999999999;
-        this.rooms.forEach(function (room) {
-          if (!full && room.z !== _this.zIndex) {
-            return;
-          }
-
-          minX = Math.min(minX, room.x);
-          minY = Math.min(minY, room.y);
-          maxX = Math.max(maxX, room.x);
-          maxY = Math.max(maxY, room.y);
-        });
-        this.labels.forEach(function (label) {
-          if (!full && label.Z !== _this.zIndex) {
-            return;
-          }
-
-          minX = Math.min(minX, label.X);
-          minY = Math.min(minY, label.Y);
-          maxX = Math.max(maxX, label.X + label.Width);
-          maxY = Math.max(maxY, label.Y + label.Height);
-        });
-        this.bounds = {
-          minX: minX,
-          minY: minY,
-          maxX: maxX,
-          maxY: maxY
-        };
-      }
-
-      return this.bounds;
-    }
-  }, {
-    key: "getRoomById",
-    value: function getRoomById(id) {
-      return this.rooms[id];
-    }
-  }, {
-    key: "getLevels",
-    value: function getLevels() {
-      return this.levels;
-    }
-  }, {
-    key: "getZIndex",
-    value: function getZIndex() {
-      return this.zIndex;
-    }
-  }]);
-
-  return Area;
-}();
-
-module.exports = {
-  Area: Area
-};
-
-},{}],5:[function(require,module,exports){
-"use strict";
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Area = require("./Area").Area;
-
-var MapReader = /*#__PURE__*/function () {
-  function MapReader(data, colors) {
-    var _this = this;
-
-    _classCallCheck(this, MapReader);
-
-    this.mapDataIndex = {};
-    this.roomIndex = {};
-    this.data = data;
-    this.data.sort(function (areaElement1, areaElement2) {
-      if (areaElement1.areaName < areaElement2.areaName) {
-        return -1;
-      }
-
-      if (areaElement1.areaName > areaElement2.areaName) {
-        return 1;
-      }
-
-      return 0;
-    });
-    data.forEach(function (value, index) {
-      _this.mapDataIndex[value.areaId] = index;
-      value.rooms.forEach(function (room) {
-        room.areaId = value.areaId;
-        _this.roomIndex[room.id] = room;
-      });
-    });
-    this.colors = {};
-    colors.forEach(function (element) {
-      _this.colors[parseInt(element.envId)] = element.colors;
-    });
-    this.colors["default"] = [255, 255, 255];
-  }
-
-  _createClass(MapReader, [{
-    key: "getAreas",
-    value: function getAreas() {
-      return this.data;
-    }
-  }, {
-    key: "getArea",
-    value: function getArea(areaId, zIndex, limits) {
-      var area = this.data[this.mapDataIndex[areaId]];
-      var levels = new Set();
-      var candidateArea = new Area(areaId, area.areaName, area.rooms.filter(function (room) {
-        levels.add(parseInt(room.z));
-        var isWithinBounds = true;
-
-        if (limits) {
-          isWithinBounds = limits.xMin < room.x && limits.xMax > room.x && limits.yMin < room.y && limits.yMax > room.y;
-        }
-
-        return isWithinBounds;
-      }), area.labels.filter(function (label) {
-        var isWithinBounds = true;
-
-        if (limits) {
-          isWithinBounds = limits.xMin < label.X && limits.xMax > label.X && limits.yMin < label.Y && limits.yMax > label.Y;
-        }
-
-        return isWithinBounds;
-      }), zIndex, levels);
-
-      if (!levels.has(zIndex)) {
-        candidateArea = this.getArea(areaId, levels.values().next().value);
-      }
-
-      return candidateArea;
-    }
-  }, {
-    key: "getAreaProperties",
-    value: function getAreaProperties(areaId) {
-      return this.data[this.mapDataIndex[areaId]];
-    }
-  }, {
-    key: "getAreaByRoomId",
-    value: function getAreaByRoomId(id, limits) {
-      var room = this.getRoomById(id);
-
-      if (room === undefined) {
-        return;
-      }
-
-      return this.getArea(room.areaId, room.z, limits);
-    }
-  }, {
-    key: "getColors",
-    value: function getColors() {
-      return this.colors;
-    }
-  }, {
-    key: "getRoomById",
-    value: function getRoomById(id) {
-      return this.roomIndex[id];
-    }
-  }]);
-
-  return MapReader;
-}();
-
-module.exports = {
-  MapReader: MapReader
-};
-
-},{"./Area":4}],6:[function(require,module,exports){
+},{"mudlet-map-renderer":4}],2:[function(require,module,exports){
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -7027,9 +5779,1046 @@ module.exports = {
 
 })));
 
-},{}],7:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
+
+},{}],4:[function(require,module,exports){
+ module.exports = {
+  Renderer: require("./map-fragment/draw/renderer").Renderer,
+  Settings: require("./map-fragment/draw/renderer").Settings,
+  MapReader: require("./map-fragment/reader/MapReader").MapReader,
+};
+
+},{"./map-fragment/draw/renderer":6,"./map-fragment/reader/MapReader":8}],5:[function(require,module,exports){
+const paper = require("paper");
+
+let selectionStyle = function (item) {
+    let style = {
+        strokeColor: new paper.Color(180 / 255, 93 / 255, 60 / 255, 0.9),
+    };
+    if (item.closed) {
+        style.fillColor = new paper.Color(
+            new paper.Gradient([[item.fillColor, 0.38], new paper.Color(1, 1, 1)], false),
+            item.bounds.topCenter,
+            item.bounds.bottomCenter
+        );
+    }
+    return style;
+};
+
+paper.Item.prototype.select = function (styleFunction) {
+    this.mapSelected = !this.mapSelected;
+    if (this.mapSelected && styleFunction !== undefined) {
+        let style = styleFunction(this);
+        this.orgStyle = {};
+        for (const key in style) {
+            this.orgStyle[key] = this[key];
+        }
+        this.style = style;
+    } else {
+        this.style = this.orgStyle;
+    }
+};
+
+class Controls {
+    constructor(renderer, reader, element, paperScope) {
+        this.renderer = renderer;
+        this.reader = reader;
+        this.element = element;
+        this.scope = paperScope;
+        this.view = paperScope.view;
+        this.element.onwheel = (event) => this.zoom(event);
+        this.activateDrag();
+        this.renderer.emitter.addEventListener("roomClick", (event) => this.selectRoom(event.detail));
+        this.renderer.emitter.addEventListener("backgroundClick", () => this.deselectRoom());
+        this.renderer.emitter.addEventListener("areaArrowClick", (event) => this.goToRoomArea(event.detail));
+
+        let bounds = this.renderer.getBounds();
+
+        this.view.center = bounds.center;
+        this.view.zoom = Math.min(this.view.size.width / bounds.width, this.view.size.height / bounds.height);
+        this.view.minZoom = this.view.zoom;
+    }
+
+    zoom(event) {
+        event.preventDefault();
+        let oldZoom = this.view.zoom;
+        this.deltaZoom(event.deltaY > 0 ? 0.9 : 1.1);
+        let viewPos = this.view.viewToProject(new paper.Point(event.offsetX, event.offsetY));
+        let zoomScale = oldZoom / this.view.zoom;
+        let centerAdjust = viewPos.subtract(this.view.center);
+        let offset = viewPos.subtract(centerAdjust.multiply(zoomScale)).subtract(this.view.center);
+        this.view.center = this.view.center.add(offset);
+    }
+
+    setZoom(value) {
+        this.view.zoom = value;
+        this.view.zoom = Math.min(Math.max(this.view.zoom, this.view.minZoom), 50);
+        this.element.dispatchEvent(new CustomEvent("zoom", { detail: this.view }));
+    }
+
+    deltaZoom(delta) {
+        this.setZoom(this.view.zoom * delta);
+    }
+
+    activateDrag() {
+        let toolPan = new paper.Tool();
+        toolPan.activate();
+        toolPan.onMouseDrag = (event) => {
+            this.element.style.cursor = "all-scroll";
+            // let bounds = this.renderer.getBounds();
+            // let viewBounds = this.view.getBounds();
+            let delta = event.downPoint.subtract(event.point);
+            // if (viewBounds.x < bounds.x) {
+            //     this.view.translate(delta);
+            // }
+            this.view.translate(delta.negate());
+            this.isDrag = true;
+        };
+        toolPan.onMouseDown = () => {
+            this.isDrag = false;
+        };
+        toolPan.onMouseUp = () => {
+            this.isDrag = false;
+            this.element.style.cursor = "default";
+        };
+    }
+
+    selectRoom(room) {
+        if (this.isDrag) {
+            return false;
+        }
+        this.deselectRoom();
+        this.renderer.renderPosition(room.id);
+        room.render.select(selectionStyle);
+        room.exitsRenders.forEach((render) => render.select(selectionStyle));
+        this.selected = room;
+
+        this.element.dispatchEvent(new CustomEvent("roomSelected", { detail: room }));
+    }
+
+    deselectRoom() {
+        if (this.isDrag) {
+            return false;
+        }
+        this.renderer.clearPosition();
+        if (this.selected !== undefined) {
+            this.selected.render.select();
+            this.selected.exitsRenders.forEach((render) => render.select());
+            delete this.selected;
+            this.element.dispatchEvent(new CustomEvent("roomDeselected"));
+        }
+    }
+
+    centerRoom(id) {
+        let room = this.renderer.area.getRoomById(id);
+        if (room !== undefined) {
+            this.view.center = room.render.localToGlobal(room.render.position);
+            this.selectRoom(room);
+        }
+    }
+
+    goToRoomArea(id) {
+        let destRoom = this.reader.getRoomById(id);
+        this.element.dispatchEvent(new CustomEvent("goToArea", { detail: destRoom }));
+    }
+
+    move(x, y) {
+        this.view.scrollBy(new paper.Point(x * 50, y * 50));
+    }
+}
+
+module.exports = {
+    Controls: Controls,
+};
+
+},{"paper":9}],6:[function(require,module,exports){
+const paper = require("paper");
+const MapReader = require("../reader/MapReader").MapReader;
+const Controls = require("./controls").Controls;
+
+const padding = 7;
+const gridSize = 20;
+
+const Colors = {
+    OPEN_DOOR : new paper.Color(10 / 255, 155 / 255, 10 / 255),
+    CLOSED_DOOR : new paper.Color(226 / 255, 205 / 255, 59 / 255),
+    LOCKED_DOOR : new paper.Color(155 / 255, 10 / 255, 10 / 255)
+}
+
+class Settings {
+    constructor() {
+        this.isRound = false;
+        this.scale = 55;
+        this.roomSize = 10;
+        this.exitsSize = 2;
+        this.borders = false;
+        this.frameMode = false;
+        this.areaName = true;
+        this.showLabels = true;
+        this.uniformLevelSize = false;
+        this.fontFamily = 'sans-serif';
+        this.mapBackground = "#000000";
+    }
+}
+
+paper.Item.prototype.registerClick = function (callback) {
+    if (typeof document !== "undefined") {
+        this.onClick = callback;
+    }
+};
+
+paper.Item.prototype.pointerReactor = function (element) {
+    if (typeof document !== "undefined") {
+        this.onMouseEnter = () => (element.style.cursor = "pointer");
+        this.onMouseLeave = () => (element.style.cursor = "default");
+    }
+};
+
+class Renderer {
+    /**
+     *
+     * @param {HTMLElement} element
+     * @param {MapReader} reader
+     * @param {*} area
+     * @param {*} colors
+     * @param {Settings} settings
+     */
+    constructor(element, reader, area, colors, settings) {
+        this.settings = new Settings();
+        Object.assign(this.settings, settings);
+        this.reader = reader;
+        this.area = area;
+        this.colors = colors;
+        this.scale = this.settings.scale;
+        this.grideSize = this.settings.gridSize;
+        this.roomSize = this.settings.roomSize;
+        this.roomFactor = this.roomSize / gridSize;
+        this.exitFactor = this.settings.exitsSize * 0.01;
+        this.roomDiagonal = this.roomFactor * Math.sqrt(2);
+        this.innerExits = ["up", "down", "u", "d", "in", "out", "i", "u"];
+        this.paper = new paper.PaperScope();
+        this.bounds = this.area.getAreaBounds(this.settings.uniformLevelSize);
+        if (element == undefined) {
+            element = new paper.Size((this.bounds.width + padding * 2) * this.scale, (this.bounds.height + padding * 2) * this.scale);
+            this.isVisual = false;
+        } else {
+            this.isVisual = true;
+            this.emitter = new EventTarget();
+        }
+        this.paper.setup(element);
+        this.element = element;
+        this.backgroundLayer = new paper.Layer();
+        this.bgLabels = new paper.Layer();
+        this.linkLayer = new paper.Layer();
+        this.roomLayer = new paper.Layer();
+        this.labelsLayer = new paper.Layer();
+        this.specialLinkLayer = new paper.Layer();
+        this.charsLayer = new paper.Layer();
+        this.overlayLayer = new paper.Layer();
+        this.exitsRendered = {};
+        this.defualtColor = new paper.Color(this.colors.default[0] / 255, this.colors.default[1] / 255, this.colors.default[2] / 255);
+        this.render();
+    }
+
+    render(pngRender = false) {
+        this.pngRender = pngRender;
+        this.renderBackground(this.bounds.minX - padding, this.bounds.minY - padding, this.bounds.maxX + padding, this.bounds.maxY + padding);
+        this.renderHeader(this.bounds.minX - padding / 2, this.bounds.maxY + padding / 2);
+        this.area.rooms
+            .filter((room) => room.z == this.area.zIndex)
+            .forEach((room) => {
+                this.renderRoom(room);
+            });
+        if (this.area.labels !== undefined && this.settings.showLabels) {
+            this.bgLabels.activate();
+            this.area.labels
+                .filter((label) => label.Z == this.area.zIndex)
+                .forEach((value) => this.renderLabel(value), this);
+        }
+        this.matrix = new paper.Matrix(1, 0, 0, -1, -this.bounds.minX + padding, this.bounds.maxY + padding).scale(
+            this.scale,
+            new paper.Point(this.bounds.minX, this.bounds.maxY)
+        );
+        this.transform();
+        if (this.isVisual) {
+            this.controls = new Controls(this, this.reader, this.element, this.paper);
+        }
+    }
+
+    transform() {
+        let padding = 1 * this.scale;
+        this.paper.project.layers.forEach((layer) => {
+            layer.applyMatrix = false;
+            layer.matrix = new paper.Matrix(1, 0, 0, -1, -this.bounds.minX + padding, this.bounds.maxY + padding).scale(
+                this.scale,
+                new paper.Point(this.bounds.minX, this.bounds.maxY)
+            );
+        });
+    }
+
+    renderBackground(x1, y1, x2, y2) {
+        this.backgroundLayer.activate();
+        let background = new paper.Path.Rectangle(new paper.Point(x1, y1), new paper.Point(x2, y2));
+        background.fillColor = new paper.Color(this.settings.mapBackground);
+        background.registerClick(() => {
+            this.emitter.dispatchEvent(new CustomEvent("backgroundClick"));
+        });
+    }
+
+    renderHeader(x, y) {
+        if (this.settings.areaName) {
+            this.backgroundLayer.activate();
+            let header = new paper.PointText(x, y);
+            header.fillColor = new paper.Color(1, 1, 1, 1);
+            header.fontSize = 2.5;
+            header.fontFamily = this.settings.fontFamily;
+            header.content = this.area.areaName;
+            header.scale(1, -1);
+        }
+    }
+
+    renderRoom(room) {
+        this.roomLayer.activate();
+        let roomShape;
+        if (!this.settings.isRound) {
+            roomShape = new paper.Path.Rectangle(new paper.Point(room.x, room.y), new paper.Size(this.roomFactor, this.roomFactor));
+        } else {
+            roomShape = new paper.Path.Circle(new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2), this.roomFactor / 2);
+        }
+        let color = this.colors[room.env];
+        if (color === undefined) {
+            color = [114, 1, 0];
+        }
+        let roomColor = new paper.Color(color[0] / 255, color[1] / 255, color[2] / 255, 1);
+        roomShape.fillColor = !this.settings.frameMode ? roomColor : new paper.Color(0, 0, 0);
+        roomShape.strokeWidth = this.exitFactor;
+        roomShape.strokeColor = !this.settings.borders || this.settings.frameMode ? roomColor : this.defualtColor;
+
+        room.render = roomShape;
+
+        room.exitsRenders = room.exitsRenders != undefined ? room.exitsRenders : [];
+        for (let dir in room.exits) {
+            if (this.innerExits.indexOf(dir) <= -1) {
+                if (room.exits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dirLongToShort(dir))) {
+                    this.renderLink(room, room.exits[dir], dir);
+                }
+            } else {
+                this.renderInnerExit(room, dir);
+            }
+        }
+
+        for (let dir in room.specialExits) {
+            if (room.specialExits.hasOwnProperty(dir) && !room.customLines.hasOwnProperty(dir)) {
+                this.renderSpecialLink(room, dir, room.specialExits[dir]);
+            }
+        }
+
+        for (let dir in room.customLines) {
+            this.renderCustomLine(room, dir);
+        }
+
+        for (let dir in room.stubs) {
+            this.renderStub(room, dirNumbers[room.stubs[dir]]);
+        }
+
+        this.renderChar(room);
+
+        roomShape.pointerReactor(this.element);
+        roomShape.registerClick(() => {
+            this.emitter.dispatchEvent(new CustomEvent("roomClick", { detail: room }));
+        });
+    }
+
+    renderLink(room, targetId, dir) {
+        let exitKey = new Array(room.id, targetId).sort().join("#");
+        if (this.exitsRendered[exitKey] && room.doors[dirLongToShort(dir)] === undefined) {
+            return;
+        }
+        this.linkLayer.activate();
+        let targetRoom = this.area.getRoomById(targetId);
+        let exitPoint = new paper.Point(this.getExitX(room.x, dir), this.getExitY(room.y, dir));
+        let path = new paper.Path();
+        let secondPoint;
+        if (targetRoom) {
+            let connectedDir = getKeyByValue(targetRoom.exits, room.id);
+            let isOneWay = connectedDir == undefined;
+            secondPoint = new paper.Point(this.getExitX(targetRoom.x, connectedDir), this.getExitY(targetRoom.y, connectedDir));
+            if (!isOneWay) {
+                path.moveTo(exitPoint);
+                path.lineTo(secondPoint);
+                path.strokeWidth = this.exitFactor;
+                path.strokeColor = this.defualtColor;
+            } else {
+                this.renderArrow(exitPoint, secondPoint, this.defualtColor, [], this.exitFactor, this.defualtColor, true);
+            }
+        } else {
+            secondPoint = new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2);
+            let color = this.colors[this.reader.getRoomById(targetId).env];
+            if (color === undefined) {
+                color = [114, 1, 0];
+            }
+            path = this.renderArrow(exitPoint, secondPoint, new paper.Color(color[0] / 255, color[1] / 255, color[2] / 255), [], this.exitFactor);
+            path.rotate(180, exitPoint);
+            path.scale(2);
+            path.pointerReactor(this.element);
+            path.registerClick(() => this.emitter.dispatchEvent(new CustomEvent("areaArrowClick", { detail: targetId })));
+        }
+
+        if (room.doors[dirLongToShort(dir)] !== undefined) {
+            this.renderDoors(exitPoint, secondPoint, room.doors[dirLongToShort(dir)]);
+        }
+
+        this.exitsRendered[exitKey] = true;
+        room.exitsRenders.push(path);
+        if (targetRoom) {
+            targetRoom.exitsRenders = targetRoom.exitsRenders != undefined ? targetRoom.exitsRenders : [];
+            targetRoom.exitsRenders.push(path);
+        }
+
+        return path;
+    }
+
+    renderSpecialLink(room, targetId, dir) {
+        this.linkLayer.activate();
+
+        let path;
+        let exitPoint = new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2);
+        let targetRoom = this.area.getRoomById(targetId);
+        let secondPoint;
+
+        if (targetRoom) {
+            path = new paper.Path();
+            path.moveTo(exitPoint);
+            let connectedDir = getKeyByValue(targetRoom.exits, room.id);
+            secondPoint = new paper.Point(this.getExitX(targetRoom.x, connectedDir), this.getExitY(targetRoom.y, connectedDir));
+            path.lineTo(secondPoint);
+
+            path.strokeWidth = 1;
+        } else {
+            secondPoint = new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2);
+            path = this.renderArrow(exitPoint, secondPoint, this.defualtColor, [], this.exitFactor);
+            path.strokeColor = this.defualtColor;
+            path.scale(1, exitPoint);
+            path.rotate(180, exitPoint);
+        }
+
+        room.exitsRenders.push(path);
+        if (targetRoom) {
+            targetRoom.exitsRenders = targetRoom.exitsRenders != "undefined" ? targetRoom.exitsRenders : [];
+            targetRoom.exitsRenders.push(path);
+        }
+
+        return path;
+    }
+
+    renderCustomLine(room, dir) {
+        if (room.customLines[dir].points !== undefined && room.customLines[dir].points.length === 0) {
+            return;
+        }
+
+        this.linkLayer.activate();
+
+        let customLine = new paper.Group();
+
+        let path = new paper.Path();
+        let style = room.customLines[dir].attributes.style;
+        if (style === "dot line") {
+            path.dashArray = [0.05, 0.05];
+            path.dashOffset = 0.1;
+        } else if (style === "dash line") {
+            path.dashArray = [0.4, 0.2];
+        } else if (style === "solid line") {
+        } else {
+            console.log("Brak opisu stylu: " + style);
+        }
+
+        if (room.customLines[dir].attributes.color !== undefined) {
+            let color = room.customLines[dir].attributes.color;
+            path.strokeColor = new paper.Color(color.r / 255, color.g / 255, color.b / 255);
+        } else {
+            path.strokeColor = this.defualtColor;
+        }
+        let lastPoint = new paper.Point(room.x + this.roomFactor / 2, room.y + this.roomFactor / 2);
+        path.moveTo(lastPoint);
+
+        if (room.customLines[dir].points !== undefined) {
+            let points = [];
+
+            room.customLines[dir].points.forEach((value) => points.push(value));
+
+            for (let point in points) {
+                let customPoint = points[point];
+                let pointCoords = new paper.Point(customPoint.x + this.roomFactor / 2, customPoint.y + this.roomFactor / 2);
+                lastPoint = new paper.Point(pointCoords);
+                path.lineTo(lastPoint);
+            }
+        }
+
+        customLine.addChild(path);
+
+        if (room.customLines[dir].attributes.arrow && path.segments.length > 1) {
+            let arrow = this.renderArrow(
+                path.segments[path.segments.length - 2].point,
+                path.segments[path.segments.length - 1].point,
+                path.strokeColor,
+                path.dashArray,
+                this.exitFactor
+            );
+            customLine.addChild(arrow);
+        }
+
+        path.strokeWidth = this.exitFactor;
+        path.orgStrokeColor = path.strokeColor;
+
+        room.exitsRenders.push(customLine);
+
+        return customLine;
+    }
+
+    renderArrow(lineStart, lineEnd, color, dashArray, strokeWidth, strokeColor, isOneWay) {
+        let arrowPoint = lineEnd;
+        let arrow = new paper.Path.RegularPolygon(arrowPoint, 3, this.roomDiagonal / 6);
+        arrow.position = arrow.position.add(arrow.bounds.topCenter.subtract(arrow.bounds.center));
+        arrow.rotate(lineEnd.subtract(lineStart).getAngle() + 90, lineEnd);
+        let tailLine = new paper.Path.Line(lineStart, arrow.bounds.center);
+        let path = new paper.Group([tailLine, arrow]);
+        path.closed = true;
+        arrow.fillColor = color;
+        arrow.strokeColor = color;
+        arrow.strokeWidth = this.exitFactor;
+        tailLine.fillColor = strokeColor ? strokeColor : color;
+        tailLine.strokeColor = strokeColor ? strokeColor : color;
+        tailLine.dashArray = dashArray;
+        tailLine.strokeWidth = this.exitFactor;
+
+        if (isOneWay) {
+            arrow.position = new paper.Point(lineEnd.x + (lineStart.x - lineEnd.x) / 2, lineEnd.y + (lineStart.y - lineEnd.y) / 2);
+            tailLine.dashArray = [0.1, 0.1];
+            path.fillColor = new paper.Color(1, 0, 0);
+            arrow.scale(1.5);
+        } else {
+            tailLine.strokeWidth = strokeWidth;
+        }
+
+        return path;
+    }
+
+    renderStub(room, dir) {
+        this.linkLayer.activate();
+        let path;
+        if (this.innerExits.indexOf(dir) > -1) {
+            path = this.renderInnerExit(room, dir, true);
+        } else {
+            let startPoint = new paper.Point(room.x + this.roomFactor * 0.5, room.y + this.roomFactor * 0.5);
+            let exitPoint = new paper.Point(this.getExitX(room.x, dir), this.getExitY(room.y, dir));
+            path = new paper.Path();
+            path.moveTo(startPoint);
+            path.lineTo(exitPoint);
+            path.pivot = startPoint;
+            path.scale(2);
+            path.position = exitPoint;
+            path.strokeWidth = this.exitFactor;
+            path.strokeColor = this.defualtColor;
+        }
+        return path;
+    }
+
+    renderInnerExit(room, direction, stub = false) {
+        this.labelsLayer.activate();
+
+        let group = new paper.Group();
+
+        if (direction === "down" || direction == "d") {
+            group.addChild(this.renderInnerTriangle(room, direction, stub));
+        }
+
+        if (direction === "up" || direction === "u") {
+            group.addChild(this.renderInnerTriangle(room, direction, stub));
+            group.rotate(180, room.render.bounds.center);
+        }
+
+        if (direction === "in" || direction === "i") {
+            let left = this.renderInnerTriangle(room, direction, stub);
+            left.rotate(90, room.render.bounds.center);
+            left.scale(0.4, room.render.bounds.center);
+            left.position.x -= 0.01;
+            let right = this.renderInnerTriangle(room, direction, stub);
+            right.scale(0.4, room.render.bounds.center);
+            right.rotate(270, room.render.bounds.center);
+            right.position.x += 0.01;
+            group.addChild(left);
+            group.addChild(right);
+        }
+
+        if (direction === "out" || direction === "o") {
+            let left = this.renderInnerTriangle(room, direction, stub);
+            left.rotate(270, room.render.bounds.center);
+            left.scale(0.5, room.render.bounds.rightCenter);
+            left.rotate(180);
+            left.position.x -= 0.01;
+            let right = this.renderInnerTriangle(room, direction, stub);
+            right.rotate(90, room.render.bounds.center);
+            right.scale(0.5, room.render.bounds.leftCenter);
+            right.rotate(180);
+            right.position.x += 0.01;
+            group.addChild(left);
+            group.addChild(right);
+        }
+
+        if (this.settings.isRound) {
+            group.scale(0.8, 0.8, new paper.Point(room.render.bounds.center));
+        }
+        group.locked = true;
+
+        return group;
+    }
+
+    renderInnerTriangle(room, direction, stub) {
+        let triangle = new paper.Path.RegularPolygon(
+            new paper.Point(room.render.bounds.bottomCenter).subtract(new paper.Point(0, 0.2 * this.roomFactor)),
+            3,
+            0.3 * this.roomFactor
+        );
+        triangle.scale(1.2, 0.75);
+        let baseColor = this.lightnessDependantColor(room);
+        triangle.strokeWidth = this.exitFactor;
+        if (!stub) {
+            triangle.fillColor = new paper.Color(baseColor, baseColor, baseColor, 0.75);
+        }
+
+        triangle.strokeColor = new paper.Color(baseColor, baseColor, baseColor);
+
+        let doorType = room.doors[dirsShortToLong(direction)];
+        if (doorType !== undefined) {
+            switch (doorType) {
+                case 1:
+                    triangle.strokeColor = Colors.OPEN_DOOR;
+                    break;
+                case 2:
+                    triangle.strokeColor = Colors.CLOSED_DOOR;
+                    break;
+                default:
+                    triangle.strokeColor = Colors.LOCKED_DOOR;
+            }
+        }
+
+        triangle.bringToFront();
+        return triangle;
+    }
+
+    renderChar(room) {
+        this.charsLayer.activate();
+        if (room.roomChar) {
+            let size = 0.85 * this.roomFactor / room.roomChar.length;
+            let x = this.pngRender ? room.render.position.x - 0.1 : room.render.position.x;
+            let text = new paper.PointText(x, room.render.position.y + size / 4);
+            if (!room.userData || room.userData["system.fallback_symbol_color"] === undefined) {
+                text.fillColor = this.lightnessDependantColor(room);
+            } else {
+                text.fillColor = room.userData["system.fallback_symbol_color"];
+            }
+            text.fontSize = size;
+            text.content = room.roomChar;
+            text.justification = "center";
+            text.locked = true;
+            text.scale(1, -1);
+        }
+    }
+
+    renderDoors(firstPoint, secondPoint, type) {
+        this.specialLinkLayer.activate();
+        let x = (firstPoint.x + secondPoint.x) / 2;
+        let y = (firstPoint.y + secondPoint.y) / 2;
+        let door = new paper.Path.Rectangle(x - 0.5, y - 0.5, 1, 1);
+        door.scale(this.roomFactor * 0.5, door.center);
+        switch (type) {
+            case 1:
+                door.strokeColor = Colors.OPEN_DOOR;
+                break;
+            case 2:
+                door.strokeColor = Colors.CLOSED_DOOR;
+                break;
+            default:
+                door.strokeColor = Colors.LOCKED_DOOR;
+        }
+
+        door.strokeWidth = this.exitFactor;
+    }
+
+    renderLabel(value) {
+        if (false && value.pixMap) {
+            //TODO Not really sure how to deal with pixMap labels here so they are ok both in .svg and browser
+            let label = new paper.Raster("data:image/png;base64," + value.pixMap);
+            label._size.width = value.Width;
+            label._size.height = value.Height;
+            label.position = new paper.Point(value.X + value.Width / 2, value.Y);
+            label.scale(this.roomFactor * 0.08, -this.roomFactor * 0.08);
+        } else {
+            let background = new paper.Path.Rectangle(new paper.Point(value.X, value.Y - value.Height), new paper.Size(value.Width, value.Height));
+            background.fillColor = new paper.Color(value.BgColor.r / 255, value.BgColor.g / 255, value.BgColor.b / 255);
+            let text = new paper.PointText(background.bounds.center.add(0, 0.15));
+            text.fillColor = new paper.Color(value.FgColor.r / 255, value.FgColor.g / 255, value.FgColor.b / 255);
+            text.fontSize = 0.75;
+            text.content = value.Text;
+            text.fontFamily = this.settings.fontFamily;
+            text.justification = "center";
+            text.locked = true;
+            text.scale(1, -1);
+        }
+    }
+
+    lightnessDependantColor(room) {
+        if (room.render.fillColor.lightness > 0.41) {
+            return 0.1;
+        } else {
+            return 0.9;
+        }
+    }
+
+    getXMid(x) {
+        return x + this.roomFactor / 2;
+    }
+
+    getYMid(y) {
+        return y + this.roomFactor / 2;
+    }
+
+    getExitX(x, dir) {
+        if (this.settings.isRound) {
+            return x + 0.5 * this.roomFactor;
+        }
+        switch (dir) {
+            case "west":
+            case "w":
+            case "northwest":
+            case "nw":
+            case "southwest":
+            case "sw":
+                return x;
+            case "east":
+            case "e":
+            case "northeast":
+            case "ne":
+            case "southeast":
+            case "se":
+                return x + this.roomFactor;
+            default:
+                return x + 0.5 * this.roomFactor;
+        }
+    }
+
+    getExitY(y, dir) {
+        if (this.settings.isRound) {
+            return y + 0.5 * this.roomFactor;
+        }
+        switch (dir) {
+            case "north":
+            case "n":
+            case "northwest":
+            case "nw":
+            case "northeast":
+            case "ne":
+                return y + this.roomFactor;
+            case "south":
+            case "s":
+            case "southwest":
+            case "sw":
+            case "southeast":
+            case "se":
+                return y;
+            default:
+                return y + 0.5 * this.roomFactor;
+        }
+    }
+
+    getRealPoint(x, y) {
+        return this.matrix.transform(new paper.Point(x, y));
+    }
+
+    getBounds() {
+        return this.backgroundLayer.getBounds();
+    }
+
+    renderPosition(id, color) {
+        this.clearPosition();
+        this.overlayLayer.activate();
+        let room = this.area.getRoomById(id);
+        let circle = new paper.Shape.Circle(new paper.Point(room.x + this.roomFactor * 0.5, room.y + this.roomFactor * 0.5), this.roomDiagonal * 0.6);
+        circle.fillColor = new paper.Color(0.5, 0.1, 0.1, 0.2);
+        circle.strokeWidth = this.exitFactor * 5;
+        circle.hadowColor = new paper.Color(1, 1, 1);
+        circle.shadowBlur = 12;
+        if (color === undefined) {
+            color = [0, 0.9, 0.7];
+        }
+        circle.strokeColor = new paper.Color(color[0], color[1], color[2]);
+        circle.dashArray = [0.05, 0.05];
+        this.position = circle;
+    }
+
+    clearPosition() {
+        if (this.position !== undefined) {
+            this.position.remove();
+        }
+    }
+
+    renderSelection(id, color) {
+        this.clearSelection();
+        this.overlayLayer.activate();
+        let room = this.area.getRoomById(id);
+        let selection = new paper.Path.Rectangle(new paper.Point(room.x - 0.05, room.y - 0.05), new paper.Size(this.roomFactor + 0.1, this.roomFactor + 0.1));
+        selection.fillColor = new paper.Color(1, 1, 1, 0);
+        selection.strokeWidth = this.exitFactor;
+        if (color === undefined) {
+            color = [0, 0.9, 0.7];
+        }
+        selection.strokeColor = new paper.Color(color[0], color[1], color[2]);
+        this.selection = selection;
+    }
+
+    clearSelection() {
+        if (this.selection !== undefined) {
+            this.selection.remove();
+        }
+    }
+
+    clear() {
+        this.paper.clear();
+    }
+
+    exportSvg(roomId, padding) {        
+        let bounds = 'content';
+        if (roomId !== undefined) {
+            let room = this.reader.roomIndex[roomId]
+            if (room === undefined) {
+                throw new Error(`Room ${roomId} not found.`)
+            }
+            bounds = new paper.Rectangle(this.getRealPoint(new paper.Point(room.x, room.y)).subtract(padding * this.scale), padding * 2 * this.scale, padding * 2 * this.scale);
+        }
+        return this.paper.project.exportSVG({ asString: true, bounds: bounds });
+    }
+}
+
+module.exports = {
+    Renderer: Renderer,
+    Settings: Settings,
+};
+
+function getKeyByValue(obj, val) {
+    for (let k in obj) {
+        if (obj.hasOwnProperty(k) && obj[k] === val) {
+            return k;
+        }
+    }
+}
+
+let dirs = {
+    north: "n",
+    south: "s",
+    east: "e",
+    west: "w",
+    northeast: "ne",
+    northwest: "nw",
+    southeast: "se",
+    southwest: "sw",
+    up: "u",
+    down: "d",
+    in: "i",
+    out: "o",
+};
+
+let dirNumbers = {
+    1: "n",
+    2: "ne",
+    3: "nw",
+    4: "e",
+    5: "w",
+    6: "s",
+    7: "se",
+    8: "sw",
+    9: "u",
+    10: "d",
+    11: "i",
+    12: "o",
+};
+
+function dirsShortToLong(dir) {
+    let result = getKeyByValue(dirs, dir);
+    return result !== undefined ? result : dir;
+}
+
+function dirLongToShort(dir) {
+    return dirs[dir] !== undefined ? dirs[dir] : dir;
+}
+
+},{"../reader/MapReader":8,"./controls":5,"paper":9}],7:[function(require,module,exports){
+class Area {
+    constructor(areaId, areaName, rooms, labels, zIndex, levels) {
+        this.areaId = parseInt(areaId);
+        this.areaName = areaName;
+        this.rooms = [];
+        this.labels = labels;
+        rooms.forEach(element => this.rooms[element.id] = element)
+        this.levels = levels;
+        this.zIndex = zIndex;
+    }
+
+    getAreaBounds(full = false) {
+        if (this.bounds === undefined) {
+            let minX = 9999999999;
+            let minY = 9999999999;
+            let maxX = -9999999999;
+            let maxY = -9999999999;
+            this.rooms.forEach((room) => {
+                if (!full && room.z !== this.zIndex) {
+                    return;
+                }
+                minX = Math.min(minX, room.x);
+                minY = Math.min(minY, room.y);
+                maxX = Math.max(maxX, room.x);
+                maxY = Math.max(maxY, room.y);
+            });
+            this.labels.forEach((label) => {
+                if (!full && label.Z !== this.zIndex) {
+                    return;
+                }
+                minX = Math.min(minX, label.X);
+                minY = Math.min(minY, label.Y);
+                maxX = Math.max(maxX, label.X + label.Width);
+                maxY = Math.max(maxY, label.Y + label.Height);
+            });
+            this.bounds = { minX: minX, minY: minY, maxX: maxX, maxY: maxY };
+        }
+
+        return this.bounds;
+    }
+
+    getRoomById(id) {
+        return this.rooms[id];
+    }
+
+    getLevels() {
+        return this.levels;
+    }
+
+    getZIndex() {
+        return this.zIndex;
+    }
+
+    limit(id, padding) {
+        let room = this.rooms[id];
+        let limits = {
+            xMin: room.x - padding,
+            xMax: room.x + padding,
+            yMin: room.y - padding,
+            yMax: room.y + padding,
+        }
+
+        let onScreen = this.rooms.filter(room => limits.xMin < room.x && limits.xMax > room.x && limits.yMin < room.y && limits.yMax > room.y).map(item => item.id)
+
+        return new Area(this.areaId, this.areaName,
+             this.rooms.filter(room => onScreen.includes(room.id) || Object.values(room.exits).filter(val => onScreen.includes(val)).length > 0), 
+             this.labels.filter(label => limits.xMin < label.X && limits.xMax > label.X && limits.yMin < label.Y && limits.yMax > label.Y),
+             this.zIndex, this.levels);   
+    }
+}
+
+module.exports = {
+    Area: Area,
+};
 
 },{}],8:[function(require,module,exports){
+let Area = require("./Area").Area;
+
+class MapReader {
+    constructor(data, colors) {
+        this.mapDataIndex = {};
+        this.roomIndex = {};
+        this.data = data;
+        this.data.sort(function (areaElement1, areaElement2) {
+            if (areaElement1.areaName < areaElement2.areaName) {
+                return -1;
+            }
+            if (areaElement1.areaName > areaElement2.areaName) {
+                return 1;
+            }
+            return 0;
+        });
+        data.forEach((value, index) => {
+            this.mapDataIndex[value.areaId] = index;
+            value.rooms.forEach((room) => {
+                room.areaId = value.areaId;
+                this.roomIndex[room.id] = room;
+            });
+        });
+        this.colors = {};
+        colors.forEach((element) => {
+            this.colors[parseInt(element.envId)] = element.colors;
+        });
+        this.colors.default = [255, 255, 255];
+    }
+
+    getAreas() {
+        return this.data;
+    }
+
+    getArea(areaId, zIndex, limits) {
+        let area = this.data[this.mapDataIndex[areaId]];
+        let levels = new Set();
+        let candidateArea = new Area(
+            areaId,
+            area.areaName,
+            area.rooms.filter((room) => {
+                levels.add(parseInt(room.z));
+                let isWithinBounds = true;
+                if (limits) {
+                    isWithinBounds = limits.xMin < room.x && limits.xMax > room.x && limits.yMin < room.y && limits.yMax > room.y;
+                }
+                return isWithinBounds;
+            }),
+            area.labels.filter((label) => {
+                let isWithinBounds = true;
+                if (limits) {
+                    isWithinBounds = limits.xMin < label.X && limits.xMax > label.X && limits.yMin < label.Y && limits.yMax > label.Y;
+                }
+                return isWithinBounds;
+            }),
+            zIndex,
+            levels
+        );
+        if (area.rooms.length > 0 && !levels.has(zIndex)) {
+            candidateArea = this.getArea(areaId, levels.values().next().value);
+        }
+        return candidateArea;
+    }
+
+    getAreaProperties(areaId) {
+        return this.data[this.mapDataIndex[areaId]];
+    }
+
+    getAreaByRoomId(id, limits) {
+        let room = this.getRoomById(id);
+        if (room === undefined) {
+            return;
+        }
+        return this.getArea(room.areaId, room.z, limits);
+    }
+
+    getColors() {
+        return this.colors;
+    }
+
+    getRoomById(id) {
+        return this.roomIndex[id];
+    }
+
+}
+
+module.exports = {
+    MapReader: MapReader,
+};
+
+},{"./Area":7}],9:[function(require,module,exports){
 /*!
  * Paper.js v0.12.15 - The Swiss Army Knife of Vector Graphics Scripting.
  * http://paperjs.org/
@@ -24490,4 +24279,4 @@ if (typeof define === 'function' && define.amd) {
 return paper;
 }.call(this, typeof self === 'object' ? self : null);
 
-},{"./node/extend.js":7,"./node/self.js":7,"acorn":6}]},{},[1]);
+},{"./node/extend.js":3,"./node/self.js":3,"acorn":2}]},{},[1]);
