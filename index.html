@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Mapa Arkadii</title>
-    <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico"/>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
     <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
     <link href="css/translations.css" rel="stylesheet" type="text/css">
     <link href="css/style.css" rel="stylesheet" type="text/css">
@@ -28,11 +28,11 @@
     <div class="controls flex-wrap btn-toolbar">
         <button class="control copy-image btn btn-secondary" title="Kopiuj obraz">
             <img src="images/files.svg" alt="Copy">
-            <span id="trn-copy">Kopiuj obraz</span>
+            <span id="trn-copy">Kopiuj</span>
         </button>
         <button class="control save-image btn btn-secondary" title="Zapisz obraz">
             <img src="images/download.svg" alt="Download">
-            <span>Zapisz obraz</span>
+            <span>Zapisz</span>
         </button>
         <button class="control search btn btn-secondary" data-toggle="modal" data-target="#search" title="Szukaj">
             <img src="images/search.svg" alt="search">
@@ -54,11 +54,6 @@
           </div>
     </div>
 </header>
-<div class="progress-container">
-    <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: 50%;"></div>
-    </div>
-</div>
 <div class="modal fade" id="search" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -71,8 +66,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="search-id">ID Lokacji:</label>
-                        <input class="form-control" type="text" id="search-id" name="roomId">
+                        <label for="search-id">Numer lokacji lub pełne imię adresata paczki:</label>
+                        <input class="form-control" type="text" id="search-id" name="roomId" autocomplete="off">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -151,6 +146,16 @@
                         <label for="map-background" class="form-label">Tło mapy</label>
                         <input type="color" class="form-control form-control-color" id="mapBackground" name="mapBackground" value="#000000" title="Wybierz kolor tła">
                     </div>
+                    <div class="form-group">
+                        <label for="linesColor" class="form-label">Kolor linii</label>
+                        <input type="color" class="form-control form-control-color" id="linesColor" name="linesColor" value="#ffffff" title="Wybierz kolor linii">
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="transparentLabels" value="1" id="transparentLabels-check">
+                        <label class="form-check-label" for="transparentLabels-check">
+                            Przezroczyste tło etykiet
+                        </label>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Zapisz</button>
@@ -180,9 +185,10 @@
             </div>
             <div class="modal-footer">
                 <div>
-                    <span>Autor</span></spanAutor>: Dargoth
+                    <span>Autor</span>: Dargoth
                     <br>
-                    GitHub: <a target="_blank" href="https://github.com/Delwing/mudlet-map-reader">https://github.com/Delwing/mudlet-map-reader</a></div>
+                    GitHub: <a target="_blank" href="https://github.com/Delwing/mudlet-map-reader">https://github.com/Delwing/mudlet-map-reader</a>
+                </div>
             </div>
         </div>
     </div>
@@ -201,8 +207,21 @@
     </button>
 </div>
 <div class="map-container">
+    <div class="progress-container">
+        <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 50%;"></div>
+        </div>
+    </div>
+    <div class="preview-container">
+        <div class="preview">
+            <img src="" class="preview-img">
+        </div>
+        <div class="preview-pan-container">
+            <div class="preview-pan"></div>
+        </div>
+    </div>
     <div class="info-box">
-        <p><span>ID Lokacji</span>: <span class="room-id"></span></p>
+        <p><span>ID Lokacji</span>: <a class="room-link" href="#"><span class="room-id"></span></a></p>
         <p><span>Nazwa</span>: <span class="room-name"></span></p>
         <p>Env Id: <span class="room-env"></span></p>
         <p><span>Koordynaty</span>:
@@ -224,15 +243,19 @@
             <p><span>Inne</span>:</p>
             <ul></ul>
         </div>
+        <div class="npc">
+            <p><span>Paczki</span>:</p>
+            <ul></ul>
+        </div>
     </div>
     <canvas id="map" resize="true"></canvas>
     <script src="data/mapExport.js"></script>
     <script src="data/colors.js"></script>
-    <script src="data/current.js"></script>
     <script src="js/jquery.js"></script>
     <script src="js/bootstrap.bundle.min.js"></script>
     <script src="js/jquery-localization.min.js"></script>
     <script src="js/translations.js"></script>
+
     <script src="dist/bundle.js"></script>
 </div>
 </body>
