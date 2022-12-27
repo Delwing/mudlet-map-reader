@@ -2,7 +2,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     height: 100%;
     width: 100%;
     margin: 0;
@@ -13,6 +14,7 @@ body {
     padding: 10px;
     background: #000;
     overflow: hidden;
+    font-size: 14px;
 }
 
 h2 {
@@ -24,13 +26,20 @@ h2 {
     top: 5px;
 }
 
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 .logo {
     position: absolute;
     left: -37px;
     width: 90px;
     top: -38px;
 }
-
 
 header {
     border-bottom: 1px solid #cbcbcb;
@@ -43,7 +52,11 @@ header {
 }
 
 .left-header {
-    display: flex
+    display: flex;
+}
+
+.map-controls {
+    display: flex;
 }
 
 .map-container {
@@ -74,7 +87,7 @@ form {
 }
 
 .info-box a {
-    color: #174762
+    color: #174762;
 }
 
 .info-box li {
@@ -108,7 +121,8 @@ canvas {
     margin: 0 10px;
 }
 
-button.control span {
+button.control > span,
+.control button > span {
     padding-left: 10px;
 }
 
@@ -138,9 +152,9 @@ button.control span {
     height: 3px;
     margin-top: 2px;
     margin-bottom: -5px;
-    z-index: 99;
-    display: none;
+    z-index: 2;
     width: 100%;
+    opacity: 0;
 }
 
 .progress {
@@ -148,13 +162,12 @@ button.control span {
     justify-content: center;
 }
 
-
 #help .modal-footer {
     display: block;
 }
 
-
-h2 a, h2 a:hover {
+h2 a,
+h2 a:hover {
     text-decoration: none;
     color: #ffffff;
 }
@@ -189,7 +202,7 @@ h2 a, h2 a:hover {
     top: 100px;
     width: 400px;
     height: 400px;
-    pointer-events: none; 
+    pointer-events: none;
     overflow: hidden;
     display: flex;
     align-items: flex-start;
@@ -201,8 +214,8 @@ h2 a, h2 a:hover {
 
 .preview {
     position: absolute;
-    display: flex; 
-    flex-direction: column; 
+    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     backdrop-filter: blur(3px) brightness(120%);
@@ -235,8 +248,58 @@ h2 a, h2 a:hover {
     backdrop-filter: blur(3px) brightness(60%);
 }
 
+#versions {
+    width: 100px;
+}
+
+.btn .badge {
+    top: 0;
+}
+
+.version-number {
+    display: none;
+}
+
+mark {
+    background: none;
+    color: inherit;
+    padding: 0;
+    text-decoration: underline;
+}
+
+.npc-autocomplete {
+    top: 90px;
+    left: 1rem;
+    right: 1rem;
+}
+
+.visible {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 1s linear;
+}
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 1s, opacity 1s linear;
+}
+
+.btn-check:focus + .btn-secondary,
+.btn-secondary:focus {
+    box-shadow: none;
+}
+
+.area-form {
+    width: 200px;
+}
+
+.nav-pills > button + button {
+    margin-left: 10px;
+}
+
 @media all and (max-width: 1400px) {
-    button.control span {
+    button.control span, .control button > span {
         display: none;
     }
 }

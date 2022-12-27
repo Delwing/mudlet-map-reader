@@ -1,262 +1,335 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>Mapa Arkadii</title>
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
-    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="css/translations.css" rel="stylesheet" type="text/css">
-    <link href="css/style.css" rel="stylesheet" type="text/css">
-</head>
-<body>
-    <div class="widget localizationTool"></div>
-<header>
-    <div class="left-header">
-        <h2>
-            <img src="images/logo.png" class="logo" id="logo" alt="logo">
-            <a href="index.html"><span id="title">Mapa Arkadii</span></a>
-        </h2>
-        <div class="map-controls">
-            <form>
-                <select class="form-control" id="area"></select>
-            </form>
-            <span class="levels-container">
-            <span class="control levels btn-group btn-group-toggle"></span>
-        </span>
-        </div>
-    </div>
-    <div class="controls flex-wrap btn-toolbar">
-        <button class="control copy-image btn btn-secondary" title="Kopiuj obraz">
-            <img src="images/files.svg" alt="Copy">
-            <span id="trn-copy">Kopiuj</span>
-        </button>
-        <button class="control save-image btn btn-secondary" title="Zapisz obraz">
-            <img src="images/download.svg" alt="Download">
-            <span>Zapisz</span>
-        </button>
-        <button class="control search btn btn-secondary" data-toggle="modal" data-target="#search" title="Szukaj">
-            <img src="images/search.svg" alt="search">
-            <span>Szukaj</span>
-        </button>
-        <button class="control settings btn btn-secondary" data-toggle="modal" data-target="#settings" title="Ustawienia">
-            <img src="images/gear-fill.svg" alt="gear">
-            <span>Ustawienia</span>
-        </button>
-        <button class="control help btn btn-secondary" data-toggle="modal" data-target="#help" title="Pomoc">
-            <img src="images/question-circle.svg" alt="question">
-            <span>Pomoc</span>
-        </button>
-        <div class="dropdown lang-dropdown">
-            <button class="btn btn-secondary dropdown-toggle lang-label" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <div class="current-language-flag flag"></div>
-            </button>
-            <div class="dropdown-menu lang-selector" aria-labelledby="dropdownMenuButton"></div>
-          </div>
-    </div>
-</header>
-<div class="modal fade" id="search" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form class="search-form">
-                <div class="modal-header">
-                    <h5 class="modal-title">Szukaj</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Mapa Arkadii</title>
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+        <link href="css/bootstrap-sandstone.min.css" rel="stylesheet" type="text/css" />
+        <link id="base-stylsheet" href="css/bootstrap-sandstone.min.css" rel="stylesheet" type="text/css" />
+        <link href="css/bootstrap.dark.min.css" rel="stylesheet" type="text/css" />
+        <link href="css/translations.css" rel="stylesheet" type="text/css" />
+        <link href="css/style.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <header>
+            <div class="left-header">
+                <h2>
+                    <img src="images/logo.png" class="logo" id="logo" alt="logo" />
+                    <a href="index.html"><span id="title" data-i18n="title">Mapa Arkadii</span></a>
+                </h2>
+                <div class="map-controls">
+                    <form class="area-form">
+                        <select class="form-select" id="area"></select>
+                    </form>
+                    <span class="levels-container">
+                        <span class="control levels btn-group btn-group-toggle"></span>
+                    </span>
                 </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="search-id">Numer lokacji lub pełne imię adresata paczki:</label>
-                        <input class="form-control" type="text" id="search-id" name="roomId" autocomplete="off">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Szukaj</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="settings" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <form class="settings-form">
-                <div class="modal-header">
-                    <h5 class="modal-title">Ustawienia</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="location-size">Wielkość lokacji</label>
-                        <input class="form-control" type="number" id="location-size" name="roomSize">
-                    </div>
-                    <div class="form-group">
-                        <label for="exits-size">Grubość linii</label>
-                        <input class="form-control" type="number" id="exits-size" name="exitsSize">
-                    </div>
-                    <div class="form-group">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="uniformLevelSize" value="1" id="uniformLevelSize">
-                            <label class="form-check-label" for="uniformLevelSize">
-                                Jednakowa wielkość poziomów strefy
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="keepZoomLevel" value="1" id="keepZoomLevel">
-                            <label class="form-check-label" for="keepZoomLevel">
-                                Zachowuj poziom przybliżenia
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="borders" value="1" id="borders-check">
-                            <label class="form-check-label" for="borders-check">
-                                Krawędzie lokacji
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="frameMode" value="1" id="frame-check">
-                            <label class="form-check-label" for="frame-check">
-                                Pokaż tylko krawędzie
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="isRound" value="1" id="round-check">
-                            <label class="form-check-label" for="round-check">
-                                Okrągłe lokacje
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="areaName" value="1" id="area-check">
-                            <label class="form-check-label" for="area-check">
-                                Nazwy stref
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="showLabels" value="1" id="labels-check">
-                            <label class="form-check-label" for="labels-check">
-                                Etykiety
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="map-background" class="form-label">Tło mapy</label>
-                        <input type="color" class="form-control form-control-color" id="mapBackground" name="mapBackground" value="#000000" title="Wybierz kolor tła">
-                    </div>
-                    <div class="form-group">
-                        <label for="linesColor" class="form-label">Kolor linii</label>
-                        <input type="color" class="form-control form-control-color" id="linesColor" name="linesColor" value="#ffffff" title="Wybierz kolor linii">
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="transparentLabels" value="1" id="transparentLabels-check">
-                        <label class="form-check-label" for="transparentLabels-check">
-                            Przezroczyste tło etykiet
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Zapisz</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Anuluj</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-<div class="modal fade" id="help" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Pomoc</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+            </div>
+            <div class="controls flex-wrap btn-toolbar">
+                <button class="control copy-image btn btn-secondary" title="Kopiuj obraz">
+                    <img src="images/files.svg" alt="Copy" />
+                    <span id="trn-copy" data-i18n="copy">Kopiuj</span>
                 </button>
+                <div class="btn-group control">
+                    <button class="save-image btn btn-secondary" title="Zapisz obraz">
+                        <img src="images/download.svg" alt="Download" />
+                        <span data-i18n="save">Zapisz</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="visually-hidden">Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item save-image" href="#" data-i18n="save-png">Zapisz jako PNG</a></li>
+                        <li><a class="dropdown-item save-image-svg" href="#" data-i18n="save-svg">Zapisz jako SVG</a></li>
+                    </ul>
+                </div>
+                <button class="control search btn btn-secondary" data-bs-toggle="modal" data-bs-target="#search" title="Szukaj">
+                    <img src="images/search.svg" alt="search" />
+                    <span data-i18n="search">Szukaj</span>
+                </button>
+                <button class="control settings btn btn-secondary" data-bs-toggle="modal" data-bs-target="#settings" title="Ustawienia">
+                    <img src="images/gear-fill.svg" alt="gear" />
+                    <span data-i18n="settings">Ustawienia</span>
+                </button>
+                <button class="control help btn btn-secondary" data-bs-toggle="modal" data-bs-target="#help" title="Pomoc">
+                    <img src="images/question-circle.svg" alt="question" />
+                    <span><span data-i18n="help">Pomoc</span> <span class="badge badge-secondary version-number"></span></span>
+                </button>
+                <div class="dropdown lang-dropdown">
+                    <button class="btn btn-secondary dropdown-toggle lang-label" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown">
+                        <div class="current-language-flag flag"></div>
+                    </button>
+                    <div class="dropdown-menu lang-selector">
+                        <a class="dropdown-item" href="#" data-lang="pl"><div class="flag flag-pl"></div></a>
+                        <a class="dropdown-item" href="#" data-lang="en"><div class="flag flag-gb"></div></a>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body">
-                <p><kbd>F1</kbd> - <span>ta pomoc</span></p>
-                <p><kbd>Ctrl + F</kbd> - <span>wyszukiwaie</span></p>
-                <p></p>
-                <p><kbd>+</kbd> - <span>przybliżenie</span></p>
-                <p><kbd>-</kbd> - <span>oddalenie</span></p>
-                <p><kbd>↑ ↓ → ←</kbd> - <span>przesuwanie mapy</span></p>
-                <p>Dodatkowo z zaznaczonej lokacji można po zwykłych wyjściach się poruszać za pomocą klawiatury numerycznej</p>
-            </div>
-            <div class="modal-footer">
-                <div>
-                    <span>Autor</span>: Dargoth
-                    <br>
-                    GitHub: <a target="_blank" href="https://github.com/Delwing/mudlet-map-reader">https://github.com/Delwing/mudlet-map-reader</a>
+        </header>
+        <div class="modal fade" id="search" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form class="search-form">
+                        <div class="modal-header">
+                            <h5 class="modal-title" data-i18n="search">Szukaj</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label" for="search-id" data-i18n="search-label">Numer lokacji lub pełne imię adresata paczki:</label>
+                                <input
+                                    class="form-control advancedAutoComplete"
+                                    type="text"
+                                    id="search-id"
+                                    name="roomId"
+                                    autocomplete="off"
+                                />
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" data-i18n="search">Szukaj</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-<div class="toasts">
-    <div class="toast" data-delay="2000">
-        <div class="toast-body"></div>
-    </div>
-</div>
-<div class="zoom-controls btn-group-vertical">
-    <button class="btn btn-secondary btn-sm" data-factor="1.1">
-        <img src="images/plus.svg" alt="plus">
-    </button>
-    <button class="btn btn-secondary btn-sm" data-factor="0.9">
-        <img src="images/dash.svg" alt="minus">
-    </button>
-</div>
-<div class="map-container">
-    <div class="progress-container">
-        <div class="progress">
-            <div class="progress-bar" role="progressbar" style="width: 50%;"></div>
+        <div class="modal fade" id="settings" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form class="settings-form">
+                        <div class="modal-header">
+                            <h5 class="modal-title" data-i18n="settings">Ustawienia</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <nav class="mb-3">
+                                <div class="nav nav-pills container" id="nav-tab" role="tablist">
+                                    <button
+                                        class="nav-link active"
+                                        id="nav-map-tab"
+                                        data-bs-toggle="pill"
+                                        data-bs-target="#nav-map"
+                                        type="button"
+                                        role="tab"
+                                        data-i18n="map"
+                                    >
+                                        Mapa
+                                    </button>
+                                    <button
+                                        class="nav-link"
+                                        id="nav-page-tab"
+                                        data-bs-toggle="pill"
+                                        data-bs-target="#nav-page"
+                                        type="button"
+                                        role="tab"
+                                        data-i18n="page"
+                                    >
+                                        Strona
+                                    </button>
+                                </div>
+                            </nav>
+                            <div class="tab-content" id="nav-tabContent">
+                                <div class="tab-pane fade show active" id="nav-map" role="tabpanel">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="location-size" data-i18n="location-size">Wielkość lokacji</label>
+                                        <input class="form-control" type="number" id="location-size" name="roomSize" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="exits-size" data-i18n="line-thickness">Grubość linii</label>
+                                        <input class="form-control" type="number" id="exits-size" name="exitsSize" />
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="uniformLevelSize" value="1" id="uniformLevelSize" />
+                                            <label class="form-check-label" for="uniformLevelSize" data-i18n="uniform-areas">
+                                                Jednakowa wielkość poziomów strefy
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="keepZoomLevel" value="1" id="keepZoomLevel" />
+                                            <label class="form-check-label" for="keepZoomLevel" data-i18n="keep-zoom-level">
+                                                Zachowuj poziom przybliżenia
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="borders" value="1" id="borders-check" />
+                                            <label class="form-check-label" for="borders-check" data-i18n="location-borders"> Krawędzie lokacji </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="frameMode" value="1" id="frame-check" />
+                                            <label class="form-check-label" for="frame-check" data-i18n="borders-only"> Pokaż tylko krawędzie </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="emboss" value="0" id="emboss-check" />
+                                            <label class="form-check-label" for="emboss-check" data-i18n="emboss-locations"> Wypukłe lokacje </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="isRound" value="1" id="round-check" />
+                                            <label class="form-check-label" for="round-check" data-i18n="round-borders"> Okrągłe lokacje </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="areaName" value="1" id="area-check" />
+                                            <label class="form-check-label" for="area-check" data-i18n="area-names"> Nazwy stref </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="showLabels" value="1" id="labels-check" />
+                                            <label class="form-check-label" for="labels-check" data-i18n="labels"> Etykiety </label>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="row row-cols-auto">
+                                            <div class="col">
+                                                <label for="map-background" class="form-label" data-i18n="background">Tło mapy</label>
+                                                <input
+                                                    type="color"
+                                                    class="form-control form-control-color"
+                                                    id="mapBackground"
+                                                    name="mapBackground"
+                                                    value="#000000"
+                                                    title="Wybierz kolor tła"
+                                                />
+                                            </div>
+                                            <div class="col">
+                                                <label for="linesColor" class="form-label" data-i18n="line-color">Kolor linii</label>
+                                                <input
+                                                    type="color"
+                                                    class="form-control form-control-color"
+                                                    id="linesColor"
+                                                    name="linesColor"
+                                                    value="#ffffff"
+                                                    title="Wybierz kolor linii"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="transparentLabels" value="1" id="transparentLabels-check" />
+                                        <label class="form-check-label" for="transparentLabels-check" data-i18n="transparent-labels">
+                                            Przezroczyste tło etykiet
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="optimizeDrag" value="1" id="optimize-drag" />
+                                        <label class="form-check-label" for="optimize-drag" data-i18n="optimize-drag">Optymalizacja przesuwania mapy</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="preview" value="1" id="preview-input" />
+                                        <label class="form-check-label" for="preview-input" data-i18n="minimap">Minimapa</label>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="nav-page" role="tabpanel">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="page-theme" data-i18n="page-theme">Styl strony</label>
+                                        <select class="form-select" id="template-selector">
+                                            <option>Sandstone</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary" data-i18n="save">Zapisz</button>
+                            <button type="reset" class="btn btn-light" data-i18n="defaults">Domyślne</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Anuluj</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="preview-container">
-        <div class="preview">
-            <img src="" class="preview-img">
+        <div class="modal fade" id="help" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" data-i18n="help">Pomoc</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><kbd>F1</kbd> - <span data-i18n="this-help">ta pomoc</span></p>
+                        <p><kbd>Ctrl + F</kbd> - <span data-i18n="search-help">szukaj</span></p>
+                        <p></p>
+                        <p><kbd>+</kbd> - <span data-i18n="zoom-in">przybliżenie</span></p>
+                        <p><kbd>-</kbd> - <span data-i18n="zoom-out">oddalenie</span></p>
+                        <p><kbd>↑ ↓ → ←</kbd> - <span data-i18n="map-move">przesuwanie mapy</span></p>
+                        <p data-i18n="move-instruction">
+                            Dodatkowo z zaznaczonej lokacji można po zwykłych wyjściach się poruszać za pomocą klawiatury numerycznej
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <div>
+                            <span data-i18n="author">Autor</span>: Dargoth
+                            <br />
+                            GitHub: <a target="_blank" href="https://github.com/Delwing/mudlet-map-reader">https://github.com/Delwing/mudlet-map-reader</a>
+                            <br /><br />
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="preview-pan-container">
-            <div class="preview-pan"></div>
+        <div class="toasts">
+            <div class="toast" data-delay="2000">
+                <div class="toast-body"></div>
+            </div>
         </div>
-    </div>
-    <div class="info-box">
-        <p><span>ID Lokacji</span>: <a class="room-link" href="#"><span class="room-id"></span></a></p>
-        <p><span>Nazwa</span>: <span class="room-name"></span></p>
-        <p>Env Id: <span class="room-env"></span></p>
-        <p><span>Koordynaty</span>:
-        <ul>
-            <li>x: <span class="coord-x"></span></li>
-            <li>y: <span class="coord-y"></span></li>
-            <li>z: <span class="coord-z"></span></li>
-            <li>Hash: <span class="room-hash"></span></li>
-        </ul>
-        <div class="exits">
-            <p><span>Wyjścia</span>:</p>
-            <ul></ul>
+        <div class="zoom-controls btn-group-vertical">
+            <button class="btn btn-secondary btn-sm" data-factor="1.1">
+                <img src="images/plus.svg" alt="plus" />
+            </button>
+            <button class="btn btn-secondary btn-sm" data-factor="0.9">
+                <img src="images/dash.svg" alt="minus" />
+            </button>
         </div>
-        <div class="special">
-            <p><span>Specjalne</span>:</p>
-            <ul></ul>
+        <div class="map-container">
+            <div class="progress-container">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 1%"></div>
+                </div>
+            </div>
+            <div class="preview-container">
+                <div class="preview">
+                    <img src="" class="preview-img" />
+                </div>
+                <div class="preview-pan-container">
+                    <div class="preview-pan"></div>
+                </div>
+            </div>
+            <div class="info-box">
+                <p>
+                    <span data-i18n="location-id">ID Lokacji</span>: <a class="room-link" href="#"><span class="room-id"></span></a>
+                </p>
+                <p><span data-i18n="name">Nazwa</span>: <span class="room-name"></span></p>
+                <p>Env Id: <span class="room-env"></span></p>
+                <p><span data-i18n="coordinates">Koordynaty</span>:</p>
+                <ul>
+                    <li>x: <span class="coord-x"></span></li>
+                    <li>y: <span class="coord-y"></span></li>
+                    <li>z: <span class="coord-z"></span></li>
+                    <li>Hash: <span class="room-hash"></span></li>
+                </ul>
+                <div class="exits">
+                    <p><span data-i18n="exits">Wyjścia</span>:</p>
+                    <ul></ul>
+                </div>
+                <div class="special">
+                    <p><span data-i18n="special">Specjalne</span>:</p>
+                    <ul></ul>
+                </div>
+                <div class="userData">
+                    <p><span data-i18n="other">Inne</span>:</p>
+                    <ul></ul>
+                </div>
+                <div class="npc">
+                    <p><span data-i18n="packages">Paczki</span>:</p>
+                    <ul></ul>
+                </div>
+            </div>
+            <canvas id="map" resize="true"></canvas>
+            <script src="data/mapExport.js"></script>
+            <script src="data/colors.js"></script>
+            <script src="js/bundle.js"></script>
+            <script src="js/page.js"></script>
         </div>
-        <div class="userData">
-            <p><span>Inne</span>:</p>
-            <ul></ul>
-        </div>
-        <div class="npc">
-            <p><span>Paczki</span>:</p>
-            <ul></ul>
-        </div>
-    </div>
-    <canvas id="map" resize="true"></canvas>
-    <script src="data/mapExport.js"></script>
-    <script src="data/colors.js"></script>
-    <script src="js/jquery.js"></script>
-    <script src="js/bootstrap.bundle.min.js"></script>
-    <script src="js/jquery-localization.min.js"></script>
-    <script src="js/translations.js"></script>
-
-    <script src="dist/bundle.js"></script>
-</div>
-</body>
+    </body>
 </html>
